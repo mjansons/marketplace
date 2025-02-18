@@ -1,0 +1,25 @@
+services:
+  web:
+    platform: linux/amd64
+    build: .
+    ports:
+      - "8080:80"
+    links:
+      - db
+    volumes:
+      - ./:/var/www/html
+    environment:
+      XDEBUG_MODE: develop,debug
+      XDEBUG_CONFIG: client_host=host.docker.internal
+  db:
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: marketplace_db
+###> doctrine/doctrine-bundle ###
+volumes:
+  ###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
