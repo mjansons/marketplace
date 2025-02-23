@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create New Product{% endblock %}
+
+{% block body %}
+    <h2>Choose Product Type</h2>
+
+    {{ form_start(chooseForm) }}
+    {{ form_widget(chooseForm) }}
+    <button class="btn btn-primary">Continue</button>
+    {{ form_end(chooseForm) }}
+{% endblock %}

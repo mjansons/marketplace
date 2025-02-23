@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Phone{% endblock %}
+
+{% block body %}
+    <h1>Phone</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ phone.id }}</td>
+            </tr>
+            <tr>
+                <th>Brand</th>
+                <td>{{ phone.brand }}</td>
+            </tr>
+            <tr>
+                <th>Model</th>
+                <td>{{ phone.model }}</td>
+            </tr>
+            <tr>
+                <th>Memory</th>
+                <td>{{ phone.memory }}</td>
+            </tr>
+            <tr>
+                <th>ProductCondition</th>
+                <td>{{ phone.productCondition }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_phone_index') }}">back to list</a>
+
+    <a href="{{ path('app_phone_edit', {'id': phone.id}) }}">edit</a>
+
+    {{ include('phone/_delete_form.html.twig') }}
+{% endblock %}

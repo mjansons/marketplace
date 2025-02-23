@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+
+
+{% block title %}Edit User{% endblock %}
+
+{% block header %}
+    <header>
+        <nav>
+            <div>
+                <a href="{{ path('app_index')}}">HOME</a>
+            </div>
+                <div>
+                    <a href="{{ path('app_dashboard')}}">DASHBOARD</a>
+                </div>
+        </nav>
+    </header>
+{% endblock %}
+
+
+{% block body %}
+    <h1>My Profile</h1>
+
+    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
+
+    {{ include('user/_delete_form.html.twig') }}
+
+    <div>
+        <a href="{{ path('app_logout')}}">LOG OUT</a>
+    </div>
+{% endblock %}

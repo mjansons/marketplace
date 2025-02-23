@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block header %}
+    <header>
+        <nav>
+            <div>
+                <a href="{{ path('app_index')}}">HOME</a>
+            </div>
+
+            <div>
+                <a href="{{ path('app_profile')}}">PROFILE</a>
+            </div>
+
+
+        </nav>
+    </header>
+{% endblock %}
+
+{% block body %}
+
+
+<div>
+    <h1>Dashboard</h1>
+
+
+    <h3>Expired</h3>
+    <h3>Active</h3>
+    <h3>Drafts</h3>
+
+</div>
+{% endblock %}
