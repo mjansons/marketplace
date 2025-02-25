@@ -42,8 +42,8 @@ security:
         ROLE_ADMIN: ROLE_USER
 
     access_control:
-         - { path: ^/dashboard, roles: ROLE_USER }
-         - { path: ^/profile, roles: ROLE_USER }
+#         - { path: ^/dashboard, roles: ROLE_USER }
+#         - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

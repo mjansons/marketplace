@@ -58,14 +58,14 @@ class Phone extends BaseProduct
         return $this;
     }
 
-    public function getProductCondition(): ProductConstants
+    public function getProductCondition(): string
     {
-        return ProductConstants::from($this->productCondition);
+        return $this->productCondition;
     }
 
-    public function setProductCondition(ProductConstants $condition): static
+    public function setProductCondition(string $productCondition): void
     {
-        $this->productCondition = $condition->value;
-        return $this;
+        $this->productCondition = $productCondition;
     }
+
 }

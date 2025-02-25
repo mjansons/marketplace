@@ -37,5 +37,7 @@
         </tbody>
     </table>
 
+    {% if app.user %}
     <a href="{{ path('app_phone_new') }}">Create new</a>
+    {% endif %}
 {% endblock %}

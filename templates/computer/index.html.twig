@@ -39,5 +39,7 @@
         </tbody>
     </table>
 
+    {% if app.user %}
     <a href="{{ path('app_computer_new') }}">Create new</a>
+    {% endif %}
 {% endblock %}

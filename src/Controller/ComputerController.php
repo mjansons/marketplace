@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/computer')]
 final class ComputerController extends AbstractController
@@ -23,6 +24,7 @@ final class ComputerController extends AbstractController
     }
 
     #[Route('/new', name: 'app_computer_new', methods: ['GET', 'POST'])]
+    #[isGranted('ROLE_USER')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $computer = new Computer();

@@ -1,6 +1,10 @@
 .env
 .env.dev
 .env.test
+
+/public/uploads/products/*
+!public/uploads/products/.gitkeep
+
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
