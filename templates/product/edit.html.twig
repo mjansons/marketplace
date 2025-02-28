@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit {{ type|capitalize }} ad{% endblock %}
+
+{% block body %}
+    <h2>Edit {{ type|capitalize }} ad</h2>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+    {# 6 drag-and-drop boxes for images #}
+    <div id="image-upload-container">
+        {# Pre-populate the boxes with existing images if available #}
+        {% set existingImages = product.imagePaths is not null ? product.imagePaths : [] %}
+        {% for i in 0..5 %}
+            <div class="image-box" id="image-box-{{ i }}">
+                <input type="file"
+                       name="{{ form.imageFiles.vars.full_name }}"
+                       id="image-upload-{{ i }}"
+                       class="image-upload-input"
+                       accept="image/*">
+                {% if existingImages[i] is defined %}
+                    <img src="{{ asset('uploads/products/' ~ existingImages[i]) }}"
+                         id="image-preview-{{ i }}"
+                         class="image-preview"
+                         style="display: block;"
+                         alt="Product Image">
+                {% else %}
+                    <img src="" id="image-preview-{{ i }}" class="image-preview" style="display: none;" alt="Product Image">
+                    <span class="placeholder-text">Click or Drag Image</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-errors">
+        {{ form_errors(form.imageFiles) }}
+    </div>
+
+    {% do form.imageFiles.setRendered() %}
+    {{ form_rest(form) }}
+
+    <button class="btn btn-primary">Save Changes</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_dashboard') }}">Back to dashboard</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Image upload and drag-and-drop logic
+            const imageBoxes = document.querySelectorAll(".image-box");
+
+            imageBoxes.forEach((box, index) => {
+                box.addEventListener("click", function () {
+                    document.getElementById("image-upload-" + index).click();
+                });
+
+                box.addEventListener("dragover", function (event) {
+                    event.preventDefault();
+                });
+
+                box.addEventListener("drop", function (event) {
+                    event.preventDefault();
+                    let file = event.dataTransfer.files[0];
+                    console.log("Dropped file:", file);
+
+                    if (file) {
+                        let inputElement = document.getElementById("image-upload-" + index);
+                        let dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        inputElement.files = dataTransfer.files;
+                        console.log("Input files:", inputElement.files);
+                        displayPreview(file, index);
+                    }
+                });
+
+                document.getElementById("image-upload-" + index).addEventListener("change", function (event) {
+                    let file = event.target.files[0];
+                    displayPreview(file, index);
+                });
+            });
+
+            function displayPreview(file, index) {
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        let imgElement = document.getElementById("image-preview-" + index);
+                        imgElement.src = e.target.result;
+                        imgElement.style.display = "block";
+                        let placeholder = document.querySelector("#image-box-" + index + " .placeholder-text");
+                        if (placeholder) {
+                            placeholder.style.display = "none";
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    </script>
+
+    {% if type == 'car' %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const brandSelector = document.querySelector(".brand-selector");
+                const modelSelector = document.querySelector(".model-selector");
+
+                if (brandSelector && modelSelector) {
+                    brandSelector.addEventListener("change", function () {
+                        const selectedBrand = this.value;
+                        modelSelector.innerHTML = '<option value="">Choose a model</option>';
+
+                        if (!selectedBrand) return;
+
+                        fetch('{{ path("get_car_models") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ brand: selectedBrand })
+                        })
+                            .then(response => response.json())
+                            .then(models => {
+                                if (models.error) {
+                                    console.error(models.error);
+                                    return;
+                                }
+                                for (const modelName of models) {
+                                    let option = new Option(modelName, modelName);
+                                    modelSelector.appendChild(option);
+                                }
+                            })
+                            .catch(error => console.error("Error fetching models:", error));
+                    });
+                }
+            });
+        </script>
+    {% endif %}
+
+    <style>
+        #image-upload-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .image-box {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        .image-upload-input {
+            display: none;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .placeholder-text {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+{% endblock %}

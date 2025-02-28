@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserProfileType;
-use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,19 +20,45 @@ final class PageController extends AbstractController
         return $this->render('page/index.html.twig', [
         ]);
     }
+
     #[Route('/dashboard', name: 'app_dashboard')]
     #[IsGranted('ROLE_USER')]
     public function dashboard(): Response
     {
+        $userProducts = $this->getUser()->getProducts();
+        $activeProducts = [];
+        $drafts = [];
+        $expiredProducts = [];
+
+        if (count($userProducts) > 0) {
+            foreach ($userProducts as $userProduct) {
+                switch ($userProduct->getStatus()) {
+                    case 'draft':
+                        $drafts[] = $userProduct;
+                        break;
+                    case 'expired':
+                        $expiredProducts[] = $userProduct;
+                        break;
+                    default:
+                        $activeProducts[] = $userProduct;
+                }
+            }
+        }
+
         return $this->render('page/dashboard.html.twig', [
-            'controller_name' => 'PageController',
+            'activeProducts' => $activeProducts,
+            'drafts' => $drafts,
+            'expiredProducts' => $expiredProducts,
         ]);
     }
 
     #[Route('/profile', name: 'app_profile')]
     #[IsGranted('ROLE_USER')]
-    public function edit(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    public function edit(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
 

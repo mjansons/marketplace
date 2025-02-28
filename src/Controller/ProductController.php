@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\BaseProduct;
 use App\Entity\Car;
 use App\Entity\Computer;
 use App\Entity\Phone;
@@ -16,7 +17,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -48,7 +49,6 @@ class ProductController extends AbstractController
         EntityManagerInterface $em,
         SluggerInterface $slugger
     ): Response {
-        // Step 2: build the correct entity & form
         switch ($type) {
             case 'car':
                 $product = new Car();
@@ -69,10 +69,8 @@ class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Set the current user
             $product->setUser($this->getUser());
 
-            // Handle image uploads
             $imageFiles = $form->get('imageFiles')->getData();
             $imagePaths = [];
             $errorMessages = [];
@@ -89,7 +87,7 @@ class ProductController extends AbstractController
                         );
                         $imagePaths[] = $newFilename;
                     } catch (FileException $e) {
-                            $errorMessages[] = sprintf(
+                        $errorMessages[] = sprintf(
                             'Failed to upload image %d (%s): %s',
                             $index + 1,
                             $imageFile->getClientOriginalName(),
@@ -131,5 +129,91 @@ class ProductController extends AbstractController
         }
 
         return new JsonResponse(CarData::getModelsByBrand($brand));
+    }
+
+    #[Route('/product/edit/{id}', name: 'app_product_edit')]
+    #[IsGranted('ROLE_USER')]
+    public function editProduct(
+        int $id,
+        EntityManagerInterface $em,
+        Request $request,
+        SluggerInterface $slugger
+    ): Response {
+        // One find() on BaseProduct returns the correct child instance
+        $product = $em->getRepository(BaseProduct::class)->find($id);
+
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+
+        if ($this->getUser() !== $product->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        // Choose the proper form based on product type
+        if ($product instanceof Car) {
+            $form = $this->createForm(CarType::class, $product);
+            $type = 'car';
+        } elseif ($product instanceof Computer) {
+            $form = $this->createForm(ComputerType::class, $product);
+            $type = 'computer';
+        } elseif ($product instanceof Phone) {
+            $form = $this->createForm(PhoneType::class, $product);
+            $type = 'phone';
+        } else {
+            throw new \LogicException('Unknown product type');
+        }
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Retrieve existing images (if any)
+            $existingImages = $product->getImagePaths() ?? [];
+            $imageFiles = $form->get('imageFiles')->getData();
+            $errorMessages = [];
+
+            // Process any new uploaded images and append them to the existing ones
+            foreach ($imageFiles as $index => $imageFile) {
+                if ($imageFile) {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('product_images_directory'),
+                            $newFilename
+                        );
+                        $existingImages[] = $newFilename;
+                    } catch (FileException $e) {
+                        $errorMessages[] = sprintf(
+                            'Failed to upload image %d (%s): %s',
+                            $index + 1,
+                            $imageFile->getClientOriginalName(),
+                            $e->getMessage()
+                        );
+                    }
+                }
+            }
+
+            foreach ($errorMessages as $errorMessage) {
+                $this->addFlash('error', $errorMessage);
+            }
+
+            // Update the product's imagePaths if new images were added
+            if (!empty($existingImages)) {
+                $product->setImagePaths($existingImages);
+            }
+
+            $em->flush();
+
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        return $this->render('product/edit.html.twig', [
+            'form'    => $form->createView(),
+            'type'    => $type,
+            'product' => $product,
+        ]);
     }
 }

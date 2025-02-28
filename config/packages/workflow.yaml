@@ -1,0 +1,23 @@
+framework:
+    workflows:
+        blog_post:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\BaseProduct
+            places:
+                - draft
+                - published
+                - expired
+            transitions:
+                publish:
+                    from: draft
+                    to: published
+                expire:
+                    from: published
+                    to: expired
+                re_publish:
+                    from: expired
+                    to: published

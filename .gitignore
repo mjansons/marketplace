@@ -1,6 +1,7 @@
 .env
 .env.dev
 .env.test
+.idea
 
 /public/uploads/products/*
 !public/uploads/products/.gitkeep

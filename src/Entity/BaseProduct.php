@@ -33,6 +33,15 @@ abstract class BaseProduct
     #[ORM\Column]
     private ?int $price = null;
 
+    #[ORM\Column(length: 255)]
+    private string $status = 'draft';
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $publishDate = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $expiryDate = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -94,6 +103,42 @@ abstract class BaseProduct
     public function setPrice(int $price): static
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getPublishDate(): ?\DateTimeInterface
+    {
+        return $this->publishDate;
+    }
+
+    public function setPublishDate(?\DateTimeInterface $publishDate): static
+    {
+        $this->publishDate = $publishDate;
+
+        return $this;
+    }
+
+    public function getExpiryDate(): ?\DateTimeInterface
+    {
+        return $this->expiryDate;
+    }
+
+    public function setExpiryDate(?\DateTimeInterface $expiryDate): static
+    {
+        $this->expiryDate = $expiryDate;
 
         return $this;
     }

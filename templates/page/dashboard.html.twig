@@ -12,8 +12,6 @@
             <div>
                 <a href="{{ path('app_profile')}}">PROFILE</a>
             </div>
-
-
         </nav>
     </header>
 {% endblock %}
@@ -24,10 +22,51 @@
 <div>
     <h1>Dashboard</h1>
 
+    <button onclick="window.location.href='{{ path('app_product_new')}}'">Create New</button>
+
+    <h3>Active</h3>
+    {% if activeProducts is not empty %}
+        <ul>
+            {% for product in activeProducts %}
+                <li>
+                    {{ product.title }} -
+                    <a href="{{ path('app_product_edit', {'id': product.id}) }}">Edit</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No active products.</p>
+    {% endif %}
+
+    <h3>Drafts</h3>
+    {% if drafts is not empty %}
+        <ul>
+            {% for product in drafts %}
+                <li>
+                    {{ product.title }} -
+                    <a href="{{ path('app_product_edit', {'id': product.id}) }}">Edit</a>
+                    <a href="">Publish(to be made)</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No drafts available.</p>
+    {% endif %}
 
     <h3>Expired</h3>
-    <h3>Active</h3>
-    <h3>Drafts</h3>
+    {% if expiredProducts is not empty %}
+        <ul>
+            {% for product in expiredProducts %}
+                <li>
+                    {{ product.title }} -
+                    <a href="{{ path('app_product_edit', {'id': product.id}) }}">Edit</a>
+                    <a href="">Publish(to be made)</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No expired products.</p>
+    {% endif %}
 
 </div>
 {% endblock %}
