@@ -9,9 +9,9 @@ class ProductWorkflowService
 {
     private WorkflowInterface $workflow;
 
-    public function __construct(WorkflowInterface $blogPostStateMachine)
+    public function __construct(WorkflowInterface $productStateMachine)
     {
-        $this->workflow = $blogPostStateMachine;
+        $this->workflow = $productStateMachine;
 
     }
 

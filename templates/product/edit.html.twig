@@ -7,9 +7,11 @@
 
     {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
+    {# Hidden field to store removed image filenames as JSON #}
+    <input type="hidden" id="removed-images" name="removedImages" value="[]">
+
     {# 6 drag-and-drop boxes for images #}
     <div id="image-upload-container">
-        {# Pre-populate the boxes with existing images if available #}
         {% set existingImages = product.imagePaths is not null ? product.imagePaths : [] %}
         {% for i in 0..5 %}
             <div class="image-box" id="image-box-{{ i }}">
@@ -23,11 +25,17 @@
                          id="image-preview-{{ i }}"
                          class="image-preview"
                          style="display: block;"
-                         alt="Product Image">
+                         alt="Product Image"
+                         data-filename="{{ existingImages[i] }}">
                 {% else %}
                     <img src="" id="image-preview-{{ i }}" class="image-preview" style="display: none;" alt="Product Image">
-                    <span class="placeholder-text">Click or Drag Image</span>
                 {% endif %}
+                <span class="placeholder-text" {% if existingImages[i] is defined %}style="display: none;"{% endif %}>
+                    Click or Drag Image
+                </span>
+                <button type="button" class="remove-image" {% if existingImages[i] is defined %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    &times;
+                </button>
             </div>
         {% endfor %}
     </div>
@@ -46,12 +54,17 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Image upload and drag-and-drop logic
-            const imageBoxes = document.querySelectorAll(".image-box");
+            const removedImagesInput = document.getElementById('removed-images');
+            let removedImages = JSON.parse(removedImagesInput.value);
 
+            // --- Image Upload and Drag-and-Drop Logic ---
+            const imageBoxes = document.querySelectorAll(".image-box");
             imageBoxes.forEach((box, index) => {
-                box.addEventListener("click", function () {
-                    document.getElementById("image-upload-" + index).click();
+                // When clicking the box (unless clicking remove), open file input
+                box.addEventListener("click", function (e) {
+                    if (!e.target.classList.contains("remove-image")) {
+                        document.getElementById("image-upload-" + index).click();
+                    }
                 });
 
                 box.addEventListener("dragover", function (event) {
@@ -61,14 +74,11 @@
                 box.addEventListener("drop", function (event) {
                     event.preventDefault();
                     let file = event.dataTransfer.files[0];
-                    console.log("Dropped file:", file);
-
                     if (file) {
                         let inputElement = document.getElementById("image-upload-" + index);
                         let dataTransfer = new DataTransfer();
                         dataTransfer.items.add(file);
                         inputElement.files = dataTransfer.files;
-                        console.log("Input files:", inputElement.files);
                         displayPreview(file, index);
                     }
                 });
@@ -76,6 +86,28 @@
                 document.getElementById("image-upload-" + index).addEventListener("change", function (event) {
                     let file = event.target.files[0];
                     displayPreview(file, index);
+                });
+
+                // Remove button: clear input, update hidden field if image is preloaded
+                let removeBtn = box.querySelector(".remove-image");
+                removeBtn.addEventListener("click", function (e) {
+                    e.stopPropagation(); // prevent triggering the box click
+                    let inputElement = document.getElementById("image-upload-" + index);
+                    inputElement.value = "";
+                    let imgElement = document.getElementById("image-preview-" + index);
+                    // If this image was preloaded, get its filename from the data attribute
+                    let removedFilename = imgElement.getAttribute("data-filename");
+                    if (removedFilename && !removedImages.includes(removedFilename)) {
+                        removedImages.push(removedFilename);
+                        removedImagesInput.value = JSON.stringify(removedImages);
+                    }
+                    imgElement.src = "";
+                    imgElement.style.display = "none";
+                    let placeholder = box.querySelector(".placeholder-text");
+                    if (placeholder) {
+                        placeholder.style.display = "block";
+                    }
+                    removeBtn.style.display = "none";
                 });
             });
 
@@ -86,55 +118,57 @@
                         let imgElement = document.getElementById("image-preview-" + index);
                         imgElement.src = e.target.result;
                         imgElement.style.display = "block";
+                        // New file: remove any existing data-filename attribute
+                        imgElement.removeAttribute("data-filename");
                         let placeholder = document.querySelector("#image-box-" + index + " .placeholder-text");
                         if (placeholder) {
                             placeholder.style.display = "none";
+                        }
+                        let removeBtn = document.querySelector("#image-box-" + index + " .remove-image");
+                        if (removeBtn) {
+                            removeBtn.style.display = "block";
                         }
                     };
                     reader.readAsDataURL(file);
                 }
             }
         });
-    </script>
 
-    {% if type == 'car' %}
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const brandSelector = document.querySelector(".brand-selector");
-                const modelSelector = document.querySelector(".model-selector");
-
-                if (brandSelector && modelSelector) {
-                    brandSelector.addEventListener("change", function () {
-                        const selectedBrand = this.value;
-                        modelSelector.innerHTML = '<option value="">Choose a model</option>';
-
-                        if (!selectedBrand) return;
-
-                        fetch('{{ path("get_car_models") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: JSON.stringify({ brand: selectedBrand })
+        // --- Dynamic Fetching for Car Models (if type is 'car') ---
+        {% if type == 'car' %}
+        document.addEventListener("DOMContentLoaded", function () {
+            const brandSelector = document.querySelector(".brand-selector");
+            const modelSelector = document.querySelector(".model-selector");
+            if (brandSelector && modelSelector) {
+                brandSelector.addEventListener("change", function () {
+                    const selectedBrand = this.value;
+                    modelSelector.innerHTML = '<option value="">Choose a model</option>';
+                    if (!selectedBrand) return;
+                    fetch('{{ path("get_car_models") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ brand: selectedBrand })
+                    })
+                        .then(response => response.json())
+                        .then(models => {
+                            if (models.error) {
+                                console.error(models.error);
+                                return;
+                            }
+                            for (const modelName of models) {
+                                let option = new Option(modelName, modelName);
+                                modelSelector.appendChild(option);
+                            }
                         })
-                            .then(response => response.json())
-                            .then(models => {
-                                if (models.error) {
-                                    console.error(models.error);
-                                    return;
-                                }
-                                for (const modelName of models) {
-                                    let option = new Option(modelName, modelName);
-                                    modelSelector.appendChild(option);
-                                }
-                            })
-                            .catch(error => console.error("Error fetching models:", error));
-                    });
-                }
-            });
-        </script>
-    {% endif %}
+                        .catch(error => console.error("Error fetching models:", error));
+                });
+            }
+        });
+        {% endif %}
+    </script>
 
     <style>
         #image-upload-container {
@@ -169,6 +203,18 @@
         .placeholder-text {
             font-size: 12px;
             color: #888;
+        }
+        .remove-image {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 0, 0, 0.8);
+            border: none;
+            color: white;
+            font-size: 16px;
+            line-height: 16px;
+            padding: 0 4px;
+            cursor: pointer;
         }
     </style>
 {% endblock %}

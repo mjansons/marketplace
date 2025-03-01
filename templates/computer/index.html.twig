@@ -20,6 +20,13 @@
         <tbody>
         {% for computer in computers %}
             <tr>
+                <td>
+                    {% if computer.imagePaths is not empty %}
+                        <img src="{{ asset('uploads/products/' ~ computer.imagePaths|first) }}" alt="Computer Thumbnail" width="50" height="50">
+                    {% else %}
+                        No Image
+                    {% endif %}
+                </td>
                 <td>{{ computer.id }}</td>
                 <td>{{ computer.brand }}</td>
                 <td>{{ computer.model }}</td>

@@ -11,6 +11,7 @@ use App\Form\ChooseProductType;
 use App\Form\ComputerType;
 use App\Form\PhoneType;
 use App\Service\CarData;
+use App\Service\ProductWorkflowService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -23,6 +24,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class ProductController extends AbstractController
 {
+
     #[Route('/product/new', name: 'app_product_new')]
     #[IsGranted('ROLE_USER')]
     public function chooseType(Request $request): Response
@@ -137,20 +139,17 @@ class ProductController extends AbstractController
         int $id,
         EntityManagerInterface $em,
         Request $request,
-        SluggerInterface $slugger
+        SluggerInterface $slugger,
+        ProductWorkflowService $workflowService
     ): Response {
-        // One find() on BaseProduct returns the correct child instance
         $product = $em->getRepository(BaseProduct::class)->find($id);
-
         if (!$product) {
             throw $this->createNotFoundException('Product not found');
         }
-
         if ($this->getUser() !== $product->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
-        // Choose the proper form based on product type
         if ($product instanceof Car) {
             $form = $this->createForm(CarType::class, $product);
             $type = 'car';
@@ -165,25 +164,20 @@ class ProductController extends AbstractController
         }
 
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            // Retrieve existing images (if any)
+            // Get the current images from the product
             $existingImages = $product->getImagePaths() ?? [];
             $imageFiles = $form->get('imageFiles')->getData();
             $errorMessages = [];
 
-            // Process any new uploaded images and append them to the existing ones
+            // Process new uploads
             foreach ($imageFiles as $index => $imageFile) {
                 if ($imageFile) {
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = $slugger->slug($originalFilename);
                     $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-
                     try {
-                        $imageFile->move(
-                            $this->getParameter('product_images_directory'),
-                            $newFilename
-                        );
+                        $imageFile->move($this->getParameter('product_images_directory'), $newFilename);
                         $existingImages[] = $newFilename;
                     } catch (FileException $e) {
                         $errorMessages[] = sprintf(
@@ -195,25 +189,141 @@ class ProductController extends AbstractController
                     }
                 }
             }
-
             foreach ($errorMessages as $errorMessage) {
                 $this->addFlash('error', $errorMessage);
             }
 
-            // Update the product's imagePaths if new images were added
-            if (!empty($existingImages)) {
-                $product->setImagePaths($existingImages);
+            // Process removed images from hidden field
+            $removedImagesJson = $request->request->get('removedImages');
+            $removedImages = $removedImagesJson ? json_decode($removedImagesJson, true) : [];
+            foreach ($removedImages as $removedFilename) {
+                $filePath = $this->getParameter('product_images_directory') . '/' . $removedFilename;
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+                if (($key = array_search($removedFilename, $existingImages)) !== false) {
+                    unset($existingImages[$key]);
+                }
+            }
+            $product->setImagePaths(array_values($existingImages));
+
+            // If the product was published or expired and is being edited,
+            // move it back to draft using workflow
+            if ($product->getStatus() === 'published') {
+                $now = new \DateTime();
+                $product->setExpiryDate($now);
+                $workflowService->applyTransition($product, 'draft_from_published');
+            } elseif ($product->getStatus() === 'expired') {
+                $workflowService->applyTransition($product, 'draft_from_expired');
             }
 
             $em->flush();
-
             return $this->redirectToRoute('app_dashboard');
         }
-
         return $this->render('product/edit.html.twig', [
             'form'    => $form->createView(),
             'type'    => $type,
             'product' => $product,
         ]);
     }
+
+    /**
+     * @throws \DateMalformedStringException
+     */
+    #[Route('/product/publish/{id}', name: 'app_product_publish', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function publishProduct(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        ProductWorkflowService $workflowService
+    ): Response {
+        $product = $em->getRepository(BaseProduct::class)->find($id);
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+        if ($product->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('You are not allowed to publish this product.');
+        }
+
+        $durationWeeks = (int) $request->request->get('durationWeeks');
+        if (!in_array($durationWeeks, [1, 2, 3, 4])) {
+            $this->addFlash('error', 'Invalid duration selected.');
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        $now = new \DateTime();
+        $expiryDate = (clone $now)->modify('+' . ($durationWeeks * 7) . ' days');
+        $product->setPublishDate($now);
+        $product->setExpiryDate($expiryDate);
+
+        if($product->getStatus() === 'draft') {
+            $workflowService->applyTransition($product, 'publish');
+        }elseif($product->getStatus() === 'expired') {
+            $workflowService->applyTransition($product, 're_publish');
+        } else {
+            $this->addFlash('error', 'This product is already published.');
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        $em->flush();
+        $this->addFlash('success', 'Product published successfully.');
+        return $this->redirectToRoute('app_dashboard');
+    }
+
+    #[Route('/product/unpublish/{id}', name: 'app_product_unpublish', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function unpublishProduct(
+        int $id,
+        EntityManagerInterface $em,
+        ProductWorkflowService $workflowService
+    ): Response {
+        $product = $em->getRepository(BaseProduct::class)->find($id);
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+        if ($product->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('You are not allowed to unpublish this product.');
+        }
+
+        $now = new \DateTime();
+        $product->setExpiryDate($now);
+
+        $workflowService->applyTransition($product, 'draft_from_published');
+
+        $em->flush();
+        $this->addFlash('success', 'Product unpublished successfully.');
+        return $this->redirectToRoute('app_dashboard');
+    }
+
+    #[Route('/product/delete/{id}', name: 'app_product_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function delete(Request $request, BaseProduct $product, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->getUser() !== $product->getUser()) {
+            throw $this->createAccessDeniedException('You are not allowed to delete this product.');
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $product->getId(), $request->request->get('_token'))) {
+            // Remove files from the filesystem
+            $imagePaths = $product->getImagePaths() ?? [];
+            foreach ($imagePaths as $filename) {
+                $filePath = $this->getParameter('product_images_directory') . '/' . $filename;
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+
+            $entityManager->remove($product);
+            $entityManager->flush();
+            $this->addFlash('success', 'Product deleted successfully.');
+        } else {
+            $this->addFlash('error', 'Invalid CSRF token.');
+        }
+
+        return $this->redirectToRoute('app_dashboard', [], Response::HTTP_SEE_OTHER);
+    }
+
+
+
 }

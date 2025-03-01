@@ -40,8 +40,8 @@ class BaseProductType extends AbstractType
                     new All([
                         new File([
                             'maxSize' => '1M',
-                            'mimeTypes' => ['image/jpeg', 'image/png', 'image/gif'],
-                            'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG, GIF).',
+                            'mimeTypes' => ['image/jpeg', 'image/png'],
+                            'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG).',
                         ]),
                     ]),
                 ],

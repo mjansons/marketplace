@@ -9,10 +9,13 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ComputerType extends AbstractType
+class ComputerType extends BaseProductType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Base fields (title, description, price)
+        parent::buildForm($builder, $options);
+
         $builder
             ->add('brand')
             ->add('model')

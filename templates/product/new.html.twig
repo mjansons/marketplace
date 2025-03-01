@@ -17,9 +17,9 @@
                        id="image-upload-{{ i }}"
                        class="image-upload-input"
                        accept="image/*">
-
                 <img src="" id="image-preview-{{ i }}" class="image-preview" style="display: none;" alt="product image">
                 <span class="placeholder-text">Click or Drag Image</span>
+                <button type="button" class="remove-image" style="display: none;">&times;</button>
             </div>
         {% endfor %}
     </div>
@@ -71,6 +71,26 @@
                     let file = event.target.files[0];
                     displayPreview(file, index);
                 });
+
+                // Add listener to remove button
+                let removeBtn = box.querySelector(".remove-image");
+                removeBtn.addEventListener("click", function (e) {
+                    e.stopPropagation(); // Prevent click event from bubbling up to the image box
+                    // Clear file input value
+                    let inputElement = document.getElementById("image-upload-" + index);
+                    inputElement.value = "";
+                    // Hide preview image
+                    let imgElement = document.getElementById("image-preview-" + index);
+                    imgElement.src = "";
+                    imgElement.style.display = "none";
+                    // Show placeholder text
+                    let placeholder = box.querySelector(".placeholder-text");
+                    if (placeholder) {
+                        placeholder.style.display = "block";
+                    }
+                    // Hide remove button
+                    removeBtn.style.display = "none";
+                });
             });
 
             function displayPreview(file, index) {
@@ -80,14 +100,22 @@
                         let imgElement = document.getElementById("image-preview-" + index);
                         imgElement.src = e.target.result;
                         imgElement.style.display = "block";
-                        document.querySelector("#image-box-" + index + " .placeholder-text").style.display = "none";
+                        // Hide placeholder text
+                        let placeholder = document.querySelector("#image-box-" + index + " .placeholder-text");
+                        if (placeholder) {
+                            placeholder.style.display = "none";
+                        }
+                        // Show remove button
+                        let removeBtn = document.querySelector("#image-box-" + index + " .remove-image");
+                        if (removeBtn) {
+                            removeBtn.style.display = "block";
+                        }
                     };
                     reader.readAsDataURL(file);
                 }
             }
-        });
 
-        document.addEventListener("DOMContentLoaded", function () {
+            // car model dynamic generation based on brand
             const brandSelector = document.querySelector(".brand-selector");
             const modelSelector = document.querySelector(".model-selector");
 
@@ -121,6 +149,7 @@
                 });
             }
         });
+
     </script>
 
     <style>
@@ -156,6 +185,18 @@
         .placeholder-text {
             font-size: 12px;
             color: #888;
+        }
+        .remove-image {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 0, 0, 0.8);
+            border: none;
+            color: white;
+            font-size: 16px;
+            line-height: 16px;
+            padding: 0 4px;
+            cursor: pointer;
         }
     </style>
 {% endblock %}

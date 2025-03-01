@@ -19,6 +19,13 @@
         <tbody>
         {% for phone in phones %}
             <tr>
+                <td>
+                    {% if phone.imagePaths is not empty %}
+                        <img src="{{ asset('uploads/products/' ~ phone.imagePaths|first) }}" alt="Phone Thumbnail" width="50" height="50">
+                    {% else %}
+                        No Image
+                    {% endif %}
+                </td>
                 <td>{{ phone.id }}</td>
                 <td>{{ phone.brand }}</td>
                 <td>{{ phone.model }}</td>

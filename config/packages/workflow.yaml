@@ -1,6 +1,6 @@
 framework:
     workflows:
-        blog_post:
+        product:
             type: 'state_machine'
             marking_store:
                 type: 'method'
@@ -21,3 +21,9 @@ framework:
                 re_publish:
                     from: expired
                     to: published
+                draft_from_expired:
+                    from: expired
+                    to: draft
+                draft_from_published:
+                    from: published
+                    to: draft
