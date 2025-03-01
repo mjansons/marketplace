@@ -30,7 +30,6 @@
                         <form action="{{ path('app_product_unpublish', {'id': product.id}) }}" method="post" style="display:inline-block;">
                             <button type="submit">Unpublish</button>
                         </form>
-                        {{ include('product/_delete_form.html.twig', { product: product }) }}
                     </li>
                 {% endfor %}
             </ul>
@@ -58,7 +57,6 @@
                             </label>
                             <button type="submit">Publish</button>
                         </form>
-                        {{ include('product/_delete_form.html.twig', { product: product }) }}
                     </li>
                 {% endfor %}
             </ul>
@@ -86,7 +84,6 @@
                             </label>
                             <button type="submit">Re-publish</button>
                         </form>
-                        {{ include('product/_delete_form.html.twig', { product: product }) }}
                     </li>
                 {% endfor %}
             </ul>

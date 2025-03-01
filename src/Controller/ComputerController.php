@@ -23,27 +23,6 @@ final class ComputerController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_computer_new', methods: ['GET', 'POST'])]
-    #[isGranted('ROLE_USER')]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $computer = new Computer();
-        $form = $this->createForm(ComputerType::class, $computer);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($computer);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_computer_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('computer/new.html.twig', [
-            'computer' => $computer,
-            'form' => $form,
-        ]);
-    }
-
     #[Route('/{id}', name: 'app_computer_show', methods: ['GET'])]
     public function show(Computer $computer): Response
     {
@@ -52,32 +31,4 @@ final class ComputerController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_computer_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Computer $computer, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(ComputerType::class, $computer);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_computer_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('computer/edit.html.twig', [
-            'computer' => $computer,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_computer_delete', methods: ['POST'])]
-    public function delete(Request $request, Computer $computer, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$computer->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($computer);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_computer_index', [], Response::HTTP_SEE_OTHER);
-    }
 }

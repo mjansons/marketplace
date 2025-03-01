@@ -1,0 +1,153 @@
+{# templates/product/_gallery_modal.html.twig #}
+{# Gallery container: display thumbnails that open the modal overlay #}
+<div class="gallery">
+    {% if images is not empty %}
+        {% for image in images %}
+            <a href="{{ asset('uploads/products/' ~ image) }}"
+               data-pswp-width="1200" data-pswp-height="800">
+                <img src="{{ asset('uploads/products/' ~ image) }}" alt="Product Image" width="100">
+            </a>
+        {% endfor %}
+    {% else %}
+        <p>No images available.</p>
+    {% endif %}
+</div>
+
+{# Modal overlay markup #}
+<div id="gallery-modal" class="modal">
+    <span class="modal-close">&times;</span>
+    <div class="modal-content">
+        <img id="modal-image" src="" alt="Gallery Image">
+        <button id="modal-prev" class="modal-nav">&#10094;</button>
+        <button id="modal-next" class="modal-nav">&#10095;</button>
+    </div>
+</div>
+
+<style>
+    /* Gallery thumbnails styling */
+    .gallery {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .gallery a img {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .gallery a img:hover {
+        transform: scale(1.05);
+    }
+
+    /* Modal overlay styling */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 99999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Modal content container: fixed dimensions and cropping */
+    .modal-content {
+        position: relative;
+        width: 80vw;
+        height: 80vh;
+        overflow: hidden;
+    }
+
+    /* Modal image fills the container and is cropped */
+    .modal-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: scale-down;
+        display: block;
+    }
+
+    /* Navigation buttons */
+    .modal-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 24px;
+    }
+    #modal-prev {
+        left: 0;
+    }
+    #modal-next {
+        right: 0;
+    }
+
+    /* Close button */
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #fff;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 100;
+    }
+</style>
+
+<script type="module">
+    document.addEventListener("DOMContentLoaded", function () {
+        const galleryLinks = document.querySelectorAll(".gallery a");
+        let images = [];
+        galleryLinks.forEach((link, index) => {
+            images.push(link.getAttribute("href"));
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+                openModal(index);
+            });
+        });
+
+        const modal = document.getElementById("gallery-modal");
+        const modalImg = document.getElementById("modal-image");
+        const closeBtn = document.querySelector(".modal-close");
+        const prevBtn = document.getElementById("modal-prev");
+        const nextBtn = document.getElementById("modal-next");
+        let currentIndex = 0;
+
+        function openModal(index) {
+            currentIndex = index;
+            modal.style.display = "flex";
+            modalImg.src = images[currentIndex];
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+        }
+
+        function showNext() {
+            currentIndex = (currentIndex + 1) % images.length;
+            modalImg.src = images[currentIndex];
+        }
+
+        function showPrev() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            modalImg.src = images[currentIndex];
+        }
+
+        closeBtn.addEventListener("click", closeModal);
+        nextBtn.addEventListener("click", showNext);
+        prevBtn.addEventListener("click", showPrev);
+
+        // Close modal when clicking outside of image content
+        modal.addEventListener("click", function (e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    });
+</script>

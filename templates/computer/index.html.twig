@@ -33,10 +33,14 @@
                 <td>{{ computer.ram }}</td>
                 <td>{{ computer.storage }}</td>
                 <td>{{ computer.productCondition }}</td>
+
                 <td>
                     <a href="{{ path('app_computer_show', {'id': computer.id}) }}">show</a>
-                    <a href="{{ path('app_computer_edit', {'id': computer.id}) }}">edit</a>
+                    {% if phone.user == app.user %}
+                        <a href="{{ path('app_product_edit', {'id': computer.id}) }}">edit</a>
+                    {% endif %}
                 </td>
+
             </tr>
         {% else %}
             <tr>
@@ -45,8 +49,7 @@
         {% endfor %}
         </tbody>
     </table>
-
     {% if app.user %}
-    <a href="{{ path('app_computer_new') }}">Create new</a>
+        <a href="{{ path('app_product_new_type', {'type': 'computer'}) }}">Create new</a>
     {% endif %}
 {% endblock %}

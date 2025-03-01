@@ -33,7 +33,9 @@
                 <td>{{ phone.productCondition }}</td>
                 <td>
                     <a href="{{ path('app_phone_show', {'id': phone.id}) }}">show</a>
-                    <a href="{{ path('app_phone_edit', {'id': phone.id}) }}">edit</a>
+                    {% if phone.user == app.user %}
+                        <a href="{{ path('app_product_edit', {'id': phone.id}) }}">edit</a>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}
@@ -45,6 +47,6 @@
     </table>
 
     {% if app.user %}
-    <a href="{{ path('app_phone_new') }}">Create new</a>
+        <a href="{{ path('app_product_new_type', {'type': 'phone'}) }}">Create new</a>
     {% endif %}
 {% endblock %}

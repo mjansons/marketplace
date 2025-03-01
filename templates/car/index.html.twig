@@ -38,7 +38,9 @@
                 <td>{{ car.price }}</td>
                 <td>
                     <a href="{{ path('app_car_show', {'id': car.id}) }}">show</a>
-                    <a href="{{ path('app_car_edit', {'id': car.id}) }}">edit</a>
+                    {% if car.user == app.user %}
+                        <a href="{{ path('app_product_edit', {'id': car.id}) }}">edit</a>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}
