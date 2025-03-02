@@ -16,6 +16,67 @@ class ComputerRepository extends ServiceEntityRepository
         parent::__construct($registry, Computer::class);
     }
 
+    public function searchComputers(array $filters, int $page, int $limit = 10): array
+    {
+        $qb = $this->createQueryBuilder('comp');
+
+        // Only fetch published computers
+        $qb->where('comp.status = :published')
+            ->setParameter('published', 'published');
+
+        if (!empty($filters['brand'])) {
+            $qb->andWhere('LOWER(comp.brand) LIKE LOWER(:brand)')
+                ->setParameter('brand', '%' . $filters['brand'] . '%');
+        }
+        if (!empty($filters['model'])) {
+            $qb->andWhere('LOWER(comp.model) LIKE LOWER(:model)')
+                ->setParameter('model', '%' . $filters['model'] . '%');
+        }
+        if (!empty($filters['ram'])) {
+            $qb->andWhere('comp.ram = :ram')
+                ->setParameter('ram', $filters['ram']);
+        }
+        if (!empty($filters['storage'])) {
+            $qb->andWhere('comp.storage = :storage')
+                ->setParameter('storage', $filters['storage']);
+        }
+        if (!empty($filters['productCondition'])) {
+            $qb->andWhere('LOWER(comp.productCondition) = LOWER(:productCondition)')
+                ->setParameter('productCondition', $filters['productCondition']);
+        }
+        if (!empty($filters['minPrice'])) {
+            $qb->andWhere('comp.price >= :minPrice')
+                ->setParameter('minPrice', $filters['minPrice']);
+        }
+        if (!empty($filters['maxPrice'])) {
+            $qb->andWhere('comp.price <= :maxPrice')
+                ->setParameter('maxPrice', $filters['maxPrice']);
+        }
+
+        // Sorting: only allow specific fields for safety
+        $allowedSortFields = ['brand', 'model', 'ram', 'storage', 'price'];
+        if (!empty($filters['sort']) && in_array($filters['sort'], $allowedSortFields, true)) {
+            $direction = strtoupper($filters['direction'] ?? 'DESC');
+            if (!in_array($direction, ['ASC', 'DESC'])) {
+                $direction = 'DESC';
+            }
+            // For text fields, sort case-insensitively.
+            if (in_array($filters['sort'], ['brand', 'model', 'productCondition'])) {
+                $qb->orderBy('LOWER(comp.' . $filters['sort'] . ')', $direction);
+            } else {
+                $qb->orderBy('comp.' . $filters['sort'], $direction);
+            }
+        } else {
+            // Default sort: by id descending
+            $qb->orderBy('comp.id', 'DESC');
+        }
+
+        return $qb->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Computer[] Returns an array of Computer objects
     //     */

@@ -32,7 +32,7 @@
 
     <a href="{{ path('app_phone_index') }}">back to list</a>
 
-    {% if car.user == app.user %}
+    {% if phone.user == app.user %}
         <a href="{{ path('app_product_edit', {'id': phone.id}) }}">edit</a>
     {% endif %}
 {% endblock %}

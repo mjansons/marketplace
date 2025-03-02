@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Select Car Brand{% endblock %}
+
+{% block body %}
+    <h1>Select a Car Brand</h1>
+
+    <ul>
+        {% for brand, count in brandCounts %}
+            <li>
+                <a href="{{ path('app_car_filter_by_brand', { brand: brand|url_encode }) }}">
+                    {{ brand|capitalize }} ({{ count }})
+                </a>
+            </li>
+        {% else %}
+            <li>No brands available.</li>
+        {% endfor %}
+    </ul>
+
+    {% if app.user %}
+        <a href="{{ path('app_product_new_type', {'type': 'car'}) }}">Create new</a>
+    {% endif %}
+{% endblock %}

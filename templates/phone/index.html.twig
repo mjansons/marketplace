@@ -1,36 +1,84 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Phone index{% endblock %}
+{% block title %}Phone Marketplace{% endblock %}
 
 {% block body %}
-    <h1>Phone index</h1>
+    <h1>Phone Marketplace</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Memory</th>
-                <th>ProductCondition</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Filter Form -->
+    <form method="get" action="{{ path('app_phone_index') }}">
+        <label>
+            Brand:
+            <input type="text" name="brand" value="{{ filters.brand ?? '' }}">
+        </label>
+        <label>
+            Model:
+            <input type="text" name="model" value="{{ filters.model ?? '' }}">
+        </label>
+        <label>
+            Memory (GB):
+            <input type="number" name="memory" value="{{ filters.memory ?? '' }}" min="0" step="1">
+        </label>
+        <label>
+            Condition:
+            <select name="productCondition">
+                <option value="">Any</option>
+                {% for condition, label in productConditions %}
+                    <option value="{{ condition }}" {{ filters.productCondition == condition ? 'selected' : '' }}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Min Price:
+            <input type="number" name="minPrice" value="{{ filters.minPrice ?? '' }}" min="0" step="1">
+        </label>
+        <label>
+            Max Price:
+            <input type="number" name="maxPrice" value="{{ filters.maxPrice ?? '' }}" min="0" step="1">
+        </label>
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Table with Sorting Links -->
+    <table>
+        <tr>
+            <td>Image</td>
+            <th>
+                <a href="{{ path('app_phone_index', filters|merge({'sort': 'brand', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    Brand
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_phone_index', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    Model
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_phone_index', filters|merge({'sort': 'memory', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    Memory (GB)
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_phone_index', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    Price (€)
+                </a>
+            </th>
+        </tr>
         {% for phone in phones %}
             <tr>
                 <td>
                     {% if phone.imagePaths is not empty %}
                         <img src="{{ asset('uploads/products/' ~ phone.imagePaths|first) }}" alt="Phone Thumbnail" width="50" height="50">
                     {% else %}
-                        No Image
+                        <img src="{{ asset('uploads/products/no_image.png') }}" alt="Phone Thumbnail" width="50" height="50">
                     {% endif %}
                 </td>
-                <td>{{ phone.id }}</td>
                 <td>{{ phone.brand }}</td>
                 <td>{{ phone.model }}</td>
                 <td>{{ phone.memory }}</td>
-                <td>{{ phone.productCondition }}</td>
+                <td>{{ phone.price }}</td>
                 <td>
                     <a href="{{ path('app_phone_show', {'id': phone.id}) }}">show</a>
                     {% if phone.user == app.user %}
@@ -40,13 +88,22 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">no records found</td>
+                <td colspan="6">No results found.</td>
             </tr>
         {% endfor %}
-        </tbody>
     </table>
 
     {% if app.user %}
-        <a href="{{ path('app_product_new_type', {'type': 'phone'}) }}">Create new</a>
+        <a href="{{ path('app_product_new_type', {'type': 'phone'}) }}">Create New</a>
     {% endif %}
+
+    <div>
+        {% if page > 1 %}
+            <a href="{{ path('app_phone_index', filters|merge({'page': page - 1})) }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page }}</span>
+        {% if phones|length == 10 %}
+            <a href="{{ path('app_phone_index', filters|merge({'page': page + 1})) }}">Next</a>
+        {% endif %}
+    </div>
 {% endblock %}
