@@ -1,0 +1,160 @@
+{% set existingImages = product ? product.imagePaths|default([]) : [] %}
+<div id="image-upload-container">
+    {% for i in 0..5 %}
+        <div class="image-box" id="image-box-{{ i }}">
+            <input type="file"
+                   name="{{ form.imageFiles.vars.full_name }}"
+                   id="image-upload-{{ i }}"
+                   class="image-upload-input"
+                   accept="image/*">
+            {% if existingImages[i] is defined %}
+                <img src="{{ asset('uploads/products/' ~ existingImages[i]) }}"
+                     id="image-preview-{{ i }}"
+                     class="image-preview"
+                     style="display: block;"
+                     alt="Product Image"
+                     data-filename="{{ existingImages[i] }}">
+            {% else %}
+                <img src="" id="image-preview-{{ i }}" class="image-preview" style="display: none;" alt="Product Image">
+            {% endif %}
+            <span class="placeholder-text" {% if existingImages[i] is defined %}style="display: none;"{% endif %}>
+                Click or Drag Image
+            </span>
+            <button type="button" class="remove-image" {% if existingImages[i] is defined %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                &times;
+            </button>
+        </div>
+    {% endfor %}
+</div>
+<input type="hidden" id="removed-images" name="removedImages" value="[]">
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const removedImagesInput = document.getElementById('removed-images');
+        let removedImages = JSON.parse(removedImagesInput.value);
+
+        const imageBoxes = document.querySelectorAll(".image-box");
+        imageBoxes.forEach((box, index) => {
+            // Open file input on box click (unless clicking remove button)
+            box.addEventListener("click", function (e) {
+                if (!e.target.classList.contains("remove-image")) {
+                    document.getElementById("image-upload-" + index).click();
+                }
+            });
+
+            // Drag-and-drop events
+            box.addEventListener("dragover", function (event) {
+                event.preventDefault();
+            });
+
+            box.addEventListener("drop", function (event) {
+                event.preventDefault();
+                let file = event.dataTransfer.files[0];
+                if (file) {
+                    let inputElement = document.getElementById("image-upload-" + index);
+                    let dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    inputElement.files = dataTransfer.files;
+                    displayPreview(file, index);
+                }
+            });
+
+            // File selection event
+            document.getElementById("image-upload-" + index).addEventListener("change", function (event) {
+                let file = event.target.files[0];
+                displayPreview(file, index);
+            });
+
+            // Remove button event
+            let removeBtn = box.querySelector(".remove-image");
+            removeBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                let inputElement = document.getElementById("image-upload-" + index);
+                inputElement.value = "";
+                let imgElement = document.getElementById("image-preview-" + index);
+                let removedFilename = imgElement.getAttribute("data-filename");
+                if (removedFilename && !removedImages.includes(removedFilename)) {
+                    removedImages.push(removedFilename);
+                    removedImagesInput.value = JSON.stringify(removedImages);
+                }
+                imgElement.src = "";
+                imgElement.style.display = "none";
+                let placeholder = box.querySelector(".placeholder-text");
+                if (placeholder) {
+                    placeholder.style.display = "block";
+                }
+                removeBtn.style.display = "none";
+            });
+        });
+
+        function displayPreview(file, index) {
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let imgElement = document.getElementById("image-preview-" + index);
+                    imgElement.src = e.target.result;
+                    imgElement.style.display = "block";
+                    imgElement.removeAttribute("data-filename");
+                    let placeholder = document.querySelector("#image-box-" + index + " .placeholder-text");
+                    if (placeholder) {
+                        placeholder.style.display = "none";
+                    }
+                    let removeBtn = document.querySelector("#image-box-" + index + " .remove-image");
+                    if (removeBtn) {
+                        removeBtn.style.display = "block";
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+</script>
+
+<style>
+    #image-upload-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .image-box {
+        width: 120px;
+        height: 120px;
+        border: 2px dashed #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    .image-upload-input {
+        display: none;
+    }
+    .image-preview {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    .placeholder-text {
+        font-size: 12px;
+        color: #888;
+    }
+    .remove-image {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: rgba(255, 0, 0, 0.8);
+        border: none;
+        color: white;
+        font-size: 16px;
+        line-height: 16px;
+        padding: 0 4px;
+        cursor: pointer;
+    }
+</style>

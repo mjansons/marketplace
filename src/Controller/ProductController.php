@@ -10,14 +10,18 @@ use App\Form\CarType;
 use App\Form\ChooseProductType;
 use App\Form\ComputerType;
 use App\Form\PhoneType;
+use App\Message\ExpireAdMessage;
 use App\Service\CarData;
+use App\Service\ProductImageHandler;
 use App\Service\ProductWorkflowService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -25,8 +29,8 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 class ProductController extends AbstractController
 {
 
-    #[Route('/product/new', name: 'app_product_new')]
     #[IsGranted('ROLE_USER')]
+    #[Route('/product/new', name: 'app_product_new')]
     public function chooseType(Request $request): Response
     {
         // Step 1: show user a simple form to pick product type
@@ -43,13 +47,13 @@ class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/product/new/{type}', name: 'app_product_new_type')]
     #[IsGranted('ROLE_USER')]
+    #[Route('/product/new/{type}', name: 'app_product_new_type')]
     public function newType(
         string $type,
         Request $request,
         EntityManagerInterface $em,
-        SluggerInterface $slugger
+        ProductImageHandler $imageHandler
     ): Response {
         switch ($type) {
             case 'car':
@@ -73,36 +77,11 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $product->setUser($this->getUser());
 
-            $imageFiles = $form->get('imageFiles')->getData();
-            $imagePaths = [];
-            $errorMessages = [];
-            foreach ($imageFiles as $index => $imageFile) {
-                if ($imageFile) {
-                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $safeFilename = $slugger->slug($originalFilename);
-                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+            // Process new image uploads
+            $uploadedFiles = $form->get('imageFiles')->getData();
+            $imagePaths = $imageHandler->processUploads($uploadedFiles);
 
-                    try {
-                        $imageFile->move(
-                            $this->getParameter('product_images_directory'),
-                            $newFilename
-                        );
-                        $imagePaths[] = $newFilename;
-                    } catch (FileException $e) {
-                        $errorMessages[] = sprintf(
-                            'Failed to upload image %d (%s): %s',
-                            $index + 1,
-                            $imageFile->getClientOriginalName(),
-                            $e->getMessage()
-                        );
-                    }
-                }
-            }
-
-            foreach ($errorMessages as $errorMessage) {
-                $this->addFlash('error', $errorMessage);
-            }
-
+            // Set the image paths if there are any
             if (!empty($imagePaths)) {
                 $product->setImagePaths($imagePaths);
             }
@@ -119,8 +98,8 @@ class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/get-models', name: 'get_car_models', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
+    #[Route('/get-models', name: 'get_car_models', methods: ['POST'])]
     public function getCarModels(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -139,8 +118,8 @@ class ProductController extends AbstractController
         int $id,
         EntityManagerInterface $em,
         Request $request,
-        SluggerInterface $slugger,
-        ProductWorkflowService $workflowService
+        ProductImageHandler $imageHandler,
+        ProductWorkflowService $workflowService,
     ): Response {
         $product = $em->getRepository(BaseProduct::class)->find($id);
         if (!$product) {
@@ -165,70 +144,35 @@ class ProductController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            // Get the current images from the product
+            // Get the current images
             $existingImages = $product->getImagePaths() ?? [];
-            $imageFiles = $form->get('imageFiles')->getData();
-            $errorMessages = [];
+            // Process new uploaded images
+            $uploadedFiles = $form->get('imageFiles')->getData();
+            $existingImages = $imageHandler->processUploads($uploadedFiles, $existingImages);
 
-            // Process new uploads
-            foreach ($imageFiles as $index => $imageFile) {
-                if ($imageFile) {
-                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $safeFilename = $slugger->slug($originalFilename);
-                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                    try {
-                        $imageFile->move($this->getParameter('product_images_directory'), $newFilename);
-                        $existingImages[] = $newFilename;
-                    } catch (FileException $e) {
-                        $errorMessages[] = sprintf(
-                            'Failed to upload image %d (%s): %s',
-                            $index + 1,
-                            $imageFile->getClientOriginalName(),
-                            $e->getMessage()
-                        );
-                    }
-                }
-            }
-            foreach ($errorMessages as $errorMessage) {
-                $this->addFlash('error', $errorMessage);
-            }
-
-            // Process removed images from hidden field
+            // Process removed images
             $removedImagesJson = $request->request->get('removedImages');
             $removedImages = $removedImagesJson ? json_decode($removedImagesJson, true) : [];
-            foreach ($removedImages as $removedFilename) {
-                $filePath = $this->getParameter('product_images_directory') . '/' . $removedFilename;
-                if (file_exists($filePath)) {
-                    @unlink($filePath);
-                }
-                if (($key = array_search($removedFilename, $existingImages)) !== false) {
-                    unset($existingImages[$key]);
-                }
-            }
-            $product->setImagePaths(array_values($existingImages));
+            $existingImages = $imageHandler->processRemovals($removedImages, $existingImages);
 
-            // If the product was published or expired and is being edited,
-            // move it back to draft using workflow
-            if ($product->getStatus() === 'published') {
-                $now = new \DateTime();
-                $product->setExpiryDate($now);
-                $workflowService->applyTransition($product, 'draft_from_published');
-            } elseif ($product->getStatus() === 'expired') {
-                $workflowService->applyTransition($product, 'draft_from_expired');
-            }
+            $product->setImagePaths($existingImages);
+
+            $workflowService->applyTransition($product, 'draft_from_published');
 
             $em->flush();
             return $this->redirectToRoute('app_dashboard');
         }
+
         return $this->render('product/edit.html.twig', [
-            'form'    => $form->createView(),
-            'type'    => $type,
+            'form' => $form->createView(),
+            'type' => $type,
             'product' => $product,
         ]);
     }
 
     /**
      * @throws \DateMalformedStringException
+     * @throws ExceptionInterface
      */
     #[Route('/product/publish/{id}', name: 'app_product_publish', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
@@ -236,7 +180,8 @@ class ProductController extends AbstractController
         int $id,
         Request $request,
         EntityManagerInterface $em,
-        ProductWorkflowService $workflowService
+        ProductWorkflowService $workflowService,
+        MessageBusInterface $bus
     ): Response {
         $product = $em->getRepository(BaseProduct::class)->find($id);
         if (!$product) {
@@ -265,6 +210,13 @@ class ProductController extends AbstractController
             $this->addFlash('error', 'This product is already published.');
             return $this->redirectToRoute('app_dashboard');
         }
+
+        $delayInSeconds = $expiryDate->getTimestamp() - time();
+        $delayMs = $delayInSeconds * 1000;
+        $bus->dispatch(new ExpireAdMessage($product->getId()), [
+            new DelayStamp($delayMs)
+        ]);
+
 
         $em->flush();
         $this->addFlash('success', 'Product published successfully.');

@@ -30,9 +30,6 @@ final class CarController extends AbstractController
     }
 
 
-// src/Controller/CarController.php
-
-    // src/Controller/CarController.php
     #[Route('/filter/{brand}', name: 'app_car_filter_by_brand', methods: ['GET'])]
     public function filterByBrand(string $brand, Request $request, CarRepository $carRepository): Response
     {
