@@ -12,35 +12,25 @@
         {% endblock %}
     </head>
     <body>
-        {% block header %} <header>
+    {% block header %}
+        <header>
             <nav>
                 <div>
-                    <a href="{{ path('app_index')}}">HOME</a>
+                    <a href="{{ path('app_index') }}">HOME</a>
                 </div>
-
                 {% if not app.user %}
-                    <div>
-                        <a href="{{ path('app_login')}}">LOGIN</a>
-                    </div>
-                    <div>
-                        <a href="{{ path('app_register')}}">SIGNUP</a>
-                    </div>
+                    <div><a href="{{ path('app_login') }}">LOGIN</a></div>
+                    <div><a href="{{ path('app_register') }}">SIGNUP</a></div>
+                {% else %}
+                    <div><a href="{{ path('app_dashboard') }}">DASHBOARD</a></div>
+                    <div><a href="{{ path('app_profile') }}">PROFILE</a></div>
                 {% endif %}
-
-                {% if app.user %}
-                    <div>
-                        <a href="{{ path('app_dashboard')}}">DASHBOARD</a>
-                    </div>
-
-                    <div>
-                        <a href="{{ path('app_profile')}}">PROFILE</a>
-                    </div>
-
-                {% endif %}
-
             </nav>
-            </header>
-        {% endblock %}
-        {% block body %}{% endblock %}
+        </header>
+    {% endblock %}
+
+    {% block body %}{% endblock %}
+
+    <script src="{{ asset('js/flash-messages.js') }}"></script>
     </body>
 </html>

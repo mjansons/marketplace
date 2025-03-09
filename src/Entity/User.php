@@ -155,4 +155,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->getEmail();
     }
+
+    public function getType(): string
+    {
+        return 'user';
+    }
 }

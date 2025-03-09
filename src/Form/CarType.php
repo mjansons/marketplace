@@ -7,17 +7,18 @@ use App\Service\CarData;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
 
 class CarType extends BaseProductType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Merge in the common fields
         parent::buildForm($builder, $options);
 
-        // Get the current Car entity from options (if editing)
+        // Car-specific fields:
         /** @var Car|null $car */
         $car = $options['data'] ?? null;
         $brand = $car instanceof Car ? $car->getBrand() : null;
@@ -27,7 +28,6 @@ class CarType extends BaseProductType
             $modelChoices = array_combine($models, $models);
         }
 
-        // Add brand field first
         $builder
             ->add('brand', ChoiceType::class, [
                 'label'       => 'Brand',
@@ -36,7 +36,6 @@ class CarType extends BaseProductType
                 'required'    => true,
                 'attr'        => ['class' => 'brand-selector'],
             ])
-            // Then add the model field with prepopulated choices (if available)
             ->add('model', ChoiceType::class, [
                 'label'       => 'Model',
                 'choices'     => $modelChoices,
@@ -62,8 +61,7 @@ class CarType extends BaseProductType
                 'attr'  => ['min' => 0],
             ]);
 
-        // PRE_SUBMIT listener to update model choices dynamically when brand changes
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function ($event) {
             $formData = $event->getData();
             $form = $event->getForm();
 
@@ -83,6 +81,7 @@ class CarType extends BaseProductType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        parent::configureOptions($resolver);
         $resolver->setDefaults([
             'data_class' => Car::class,
         ]);

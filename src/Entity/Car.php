@@ -30,6 +30,11 @@ class Car extends BaseProduct
         return $this->year;
     }
 
+    public function getType(): string
+    {
+        return 'car';
+    }
+
     public function setYear(int $year): static
     {
         $this->year = $year;

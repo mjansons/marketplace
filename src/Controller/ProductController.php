@@ -14,6 +14,8 @@ use App\Message\ExpireAdMessage;
 use App\Service\CarData;
 use App\Service\ProductImageHandler;
 use App\Service\ProductWorkflowService;
+use DateMalformedStringException;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +26,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Workflow\Registry;
 
 class ProductController extends AbstractController
 {
@@ -53,35 +55,43 @@ class ProductController extends AbstractController
         string $type,
         Request $request,
         EntityManagerInterface $em,
-        ProductImageHandler $imageHandler
+        ProductImageHandler $imageHandler,
+        Registry $workflowRegistry
     ): Response {
         switch ($type) {
             case 'car':
                 $product = new Car();
-                $form = $this->createForm(CarType::class, $product);
+                $formClass = CarType::class;
                 break;
             case 'computer':
                 $product = new Computer();
-                $form = $this->createForm(ComputerType::class, $product);
+                $formClass = ComputerType::class;
                 break;
             case 'phone':
                 $product = new Phone();
-                $form = $this->createForm(PhoneType::class, $product);
+                $formClass = PhoneType::class;
                 break;
             default:
                 throw $this->createNotFoundException('Invalid product type');
         }
 
+        $workflow = $workflowRegistry->get($product);
+        $statusChoices = array_keys($workflow->getDefinition()->getPlaces());
+
+        // Create form with the status_choices option
+        $form = $this->createForm($formClass, $product, [
+            'status_choices' => $statusChoices,
+            'is_admin' => $this->isGranted('ROLE_ADMIN'),
+            'user' => $this->getUser(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $product->setUser($this->getUser());
 
-            // Process new image uploads
+            // Process image uploads
             $uploadedFiles = $form->get('imageFiles')->getData();
             $imagePaths = $imageHandler->processUploads($uploadedFiles);
-
-            // Set the image paths if there are any
             if (!empty($imagePaths)) {
                 $product->setImagePaths($imagePaths);
             }
@@ -89,6 +99,7 @@ class ProductController extends AbstractController
             $em->persist($product);
             $em->flush();
 
+            $this->addFlash('success', 'Product created successfully.');
             return $this->redirectToRoute('app_dashboard');
         }
 
@@ -112,14 +123,15 @@ class ProductController extends AbstractController
         return new JsonResponse(CarData::getModelsByBrand($brand));
     }
 
-    #[Route('/product/edit/{id}', name: 'app_product_edit')]
     #[IsGranted('ROLE_USER')]
+    #[Route('/product/edit/{id}', name: 'app_product_edit')]
     public function editProduct(
         int $id,
         EntityManagerInterface $em,
         Request $request,
         ProductImageHandler $imageHandler,
         ProductWorkflowService $workflowService,
+        Registry $workflowRegistry
     ): Response {
         $product = $em->getRepository(BaseProduct::class)->find($id);
         if (!$product) {
@@ -130,48 +142,58 @@ class ProductController extends AbstractController
         }
 
         if ($product instanceof Car) {
-            $form = $this->createForm(CarType::class, $product);
             $type = 'car';
+            $formClass = CarType::class;
         } elseif ($product instanceof Computer) {
-            $form = $this->createForm(ComputerType::class, $product);
             $type = 'computer';
+            $formClass = ComputerType::class;
         } elseif ($product instanceof Phone) {
-            $form = $this->createForm(PhoneType::class, $product);
             $type = 'phone';
+            $formClass = PhoneType::class;
         } else {
             throw new \LogicException('Unknown product type');
         }
 
+
+        $workflow = $workflowRegistry->get($product);
+        $statusChoices = array_keys($workflow->getDefinition()->getPlaces());
+
+        $form = $this->createForm($formClass, $product, [
+            'status_choices' => $statusChoices,
+            'is_admin' => $this->isGranted('ROLE_ADMIN'),
+        ]);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            // Get the current images
+            // Process image uploads/removals
             $existingImages = $product->getImagePaths() ?? [];
-            // Process new uploaded images
             $uploadedFiles = $form->get('imageFiles')->getData();
             $existingImages = $imageHandler->processUploads($uploadedFiles, $existingImages);
 
-            // Process removed images
             $removedImagesJson = $request->request->get('removedImages');
             $removedImages = $removedImagesJson ? json_decode($removedImagesJson, true) : [];
             $existingImages = $imageHandler->processRemovals($removedImages, $existingImages);
 
             $product->setImagePaths($existingImages);
 
-            $workflowService->applyTransition($product, 'draft_from_published');
+            if ($product->getStatus() === "published") {
+                $workflowService->applyTransition($product, 'draft_from_published');
+            }
 
             $em->flush();
+            $this->addFlash('success', 'Product updated successfully.');
             return $this->redirectToRoute('app_dashboard');
         }
 
         return $this->render('product/edit.html.twig', [
-            'form' => $form->createView(),
-            'type' => $type,
+            'form'    => $form->createView(),
+            'type'    => $type,
             'product' => $product,
         ]);
     }
 
     /**
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      * @throws ExceptionInterface
      */
     #[Route('/product/publish/{id}', name: 'app_product_publish', methods: ['POST'])]
@@ -197,7 +219,7 @@ class ProductController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        $now = new \DateTime();
+        $now = new DateTime();
         $expiryDate = (clone $now)->modify('+' . ($durationWeeks * 7) . ' days');
         $product->setPublishDate($now);
         $product->setExpiryDate($expiryDate);
@@ -238,7 +260,7 @@ class ProductController extends AbstractController
             throw $this->createAccessDeniedException('You are not allowed to unpublish this product.');
         }
 
-        $now = new \DateTime();
+        $now = new DateTime();
         $product->setExpiryDate($now);
 
         $workflowService->applyTransition($product, 'draft_from_published');

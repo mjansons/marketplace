@@ -18,6 +18,10 @@ class Computer extends BaseProduct
     #[ORM\Column]
     private ?int $ram = null;
 
+    public function getType(): string
+    {
+        return 'computer';
+    }
     #[ORM\Column]
     private ?int $storage = null;
 

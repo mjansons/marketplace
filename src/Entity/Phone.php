@@ -68,4 +68,8 @@ class Phone extends BaseProduct
         $this->productCondition = $productCondition;
     }
 
+    public function getType(): string
+    {
+        return 'phone';
+    }
 }

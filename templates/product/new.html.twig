@@ -1,17 +1,37 @@
 {# templates/product/new.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Create a new {{ type|capitalize }} ad{% endblock %}
+{% block title %}
+    Create a new {{ type|default('car')|capitalize }} ad
+{% endblock %}
 
 {% block body %}
+    {% if form is not defined and new_form is defined %}
+        {% set form = new_form %}
+    {% endif %}
+
+    {% if type == 'car' %}
+        <script src="{{ asset('js/car-models.js') }}"></script>
+    {% endif %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+
     <h2>Create a new {{ type|capitalize }} ad</h2>
 
     {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
-    {# Include the custom image upload partial – it handles the six boxes, previews, removals, etc. #}
-    {% include 'product/_image_upload.html.twig' with { 'product': product|default(null), 'form': form } %}
-
-    {# Mark the imageFiles field as rendered so form_rest() won’t output it again #}
+    {# Let your partial handle the fancy multi-image UI #}
+    {% include 'product/_image_upload.html.twig' with {
+        'product': product|default(null),
+        'form': form
+    } %}
     {% do form.imageFiles.setRendered() %}
 
     <div class="form-errors">
@@ -19,44 +39,19 @@
     </div>
 
     {{ form_rest(form) }}
+
     <button class="btn btn-primary">Save</button>
     {{ form_end(form) }}
-    <a href="{{ path('app_dashboard') }}">Back to dashboard</a>
 
-    {# --- Dynamic model fetching for car type (if applicable) --- #}
-    {% if type == 'car' %}
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const brandSelector = document.querySelector(".brand-selector");
-                const modelSelector = document.querySelector(".model-selector");
-                if (brandSelector && modelSelector) {
-                    brandSelector.addEventListener("change", function () {
-                        const selectedBrand = this.value;
-                        modelSelector.innerHTML = '<option value="">Choose a model</option>';
-                        if (!selectedBrand) return;
-                        fetch('{{ path("get_car_models") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: JSON.stringify({ brand: selectedBrand })
-                        })
-                            .then(response => response.json())
-                            .then(models => {
-                                if (models.error) {
-                                    console.error(models.error);
-                                    return;
-                                }
-                                for (const modelName of models) {
-                                    let option = new Option(modelName, modelName);
-                                    modelSelector.appendChild(option);
-                                }
-                            })
-                            .catch(error => console.error("Error fetching models:", error));
-                    });
-                }
-            });
-        </script>
+    {% set referrer = app.request.headers.get('referer') %}
+    {% if referrer is not empty %}
+        <a href="{{ referrer }}">Back</a>
+    {% else %}
+        {# Fallback based on role #}
+        {% if isAdmin %}
+            <a href="{{ path('admin_car_index') }}">Back to admin dashboard</a>
+        {% else %}
+            <a href="{{ path('app_dashboard') }}">Back to user dashboard</a>
+        {% endif %}
     {% endif %}
 {% endblock %}

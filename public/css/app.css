@@ -32,3 +32,42 @@ nav {
     flex-direction: row;
     justify-content: space-between;
 }
+
+/* Flash message container */
+.alert {
+    position: absolute;
+    margin: 10px auto;
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 16px;
+    z-index: 10;
+}
+
+/* Success messages */
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+/* Error messages */
+.alert-error, .alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+/* Info messages */
+.alert-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+/* Warning messages */
+.alert-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
