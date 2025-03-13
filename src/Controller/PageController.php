@@ -52,6 +52,8 @@ final class PageController extends AbstractController
         ]);
     }
 
+    // src/Controller/PageController.php
+
     #[Route('/profile', name: 'app_profile')]
     #[IsGranted('ROLE_USER')]
     public function edit(
@@ -67,7 +69,8 @@ final class PageController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
-            if ($plainPassword) {
+
+            if (!empty($plainPassword)) {
                 $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
             }
@@ -79,8 +82,9 @@ final class PageController extends AbstractController
 
         return $this->render('page/profile.html.twig', [
             'user' => $user,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
+
 
 }

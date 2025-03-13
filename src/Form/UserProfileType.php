@@ -4,11 +4,12 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 
 class UserProfileType extends AbstractType
 {
@@ -16,16 +17,27 @@ class UserProfileType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class)
-            ->add('plainPassword', PasswordType::class, [
-                'label' => 'New Password',
-                'mapped' => false,      // This prevents it from being stored directly
-                'required' => false,    // Allows user to leave it blank if not changing password
-                'always_empty' => true, // Prevents the field from pre-filling
-                'attr' => [
-                    'autocomplete' => 'new-password'
+            ->add('plainPassword', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'mapped' => false,
+                'required' => false, // optional password change
+                'first_options' => [
+                    'label' => 'New Password',
+                    'attr' => ['autocomplete' => 'new-password'],
                 ],
-            ])
-        ;
+                'second_options' => [
+                    'label' => 'Repeat New Password',
+                    'attr' => ['autocomplete' => 'new-password'],
+                ],
+                'invalid_message' => 'The passwords must match.',
+                'constraints' => [
+                    new Length([
+                        'min' => 6,
+                        'minMessage' => 'Password must be at least {{ limit }} characters.',
+                        'max' => 4096,
+                    ]),
+                ],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -35,3 +47,4 @@ class UserProfileType extends AbstractType
         ]);
     }
 }
+

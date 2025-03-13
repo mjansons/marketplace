@@ -12,9 +12,8 @@ use App\Form\ComputerType;
 use App\Form\PhoneType;
 use App\Message\ExpireAdMessage;
 use App\Service\CarData;
-use App\Service\ProductImageHandler;
+use App\Service\ProductFormHandler;
 use App\Service\ProductWorkflowService;
-use DateMalformedStringException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,7 +29,6 @@ use Symfony\Component\Workflow\Registry;
 
 class ProductController extends AbstractController
 {
-
     #[IsGranted('ROLE_USER')]
     #[Route('/product/new', name: 'app_product_new')]
     public function chooseType(Request $request): Response
@@ -49,14 +47,16 @@ class ProductController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     #[IsGranted('ROLE_USER')]
     #[Route('/product/new/{type}', name: 'app_product_new_type')]
     public function newType(
         string $type,
         Request $request,
-        EntityManagerInterface $em,
-        ProductImageHandler $imageHandler,
-        Registry $workflowRegistry
+        Registry $workflowRegistry,
+        ProductFormHandler $productFormHandler
     ): Response {
         switch ($type) {
             case 'car':
@@ -87,17 +87,7 @@ class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $product->setUser($this->getUser());
-
-            // Process image uploads
-            $uploadedFiles = $form->get('imageFiles')->getData();
-            $imagePaths = $imageHandler->processUploads($uploadedFiles);
-            if (!empty($imagePaths)) {
-                $product->setImagePaths($imagePaths);
-            }
-
-            $em->persist($product);
-            $em->flush();
+            $productFormHandler->handleProductForm($form, $request, $product, $this->getUser());
 
             $this->addFlash('success', 'Product created successfully.');
             return $this->redirectToRoute('app_dashboard');
@@ -106,31 +96,20 @@ class ProductController extends AbstractController
         return $this->render('product/new.html.twig', [
             'form' => $form->createView(),
             'type' => $type,
+            'user' => $this->getUser()
         ]);
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/get-models', name: 'get_car_models', methods: ['POST'])]
-    public function getCarModels(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $brand = $data['brand'] ?? null;
-
-        if (!$brand || !array_key_exists($brand, CarData::getCarBrands())) {
-            return new JsonResponse(['error' => 'Invalid brand: ' . $brand], 400);
-        }
-
-        return new JsonResponse(CarData::getModelsByBrand($brand));
-    }
-
+    /**
+     * @throws ExceptionInterface
+     */
     #[IsGranted('ROLE_USER')]
     #[Route('/product/edit/{id}', name: 'app_product_edit')]
     public function editProduct(
         int $id,
         EntityManagerInterface $em,
         Request $request,
-        ProductImageHandler $imageHandler,
-        ProductWorkflowService $workflowService,
+        ProductFormHandler $productFormHandler,
         Registry $workflowRegistry
     ): Response {
         $product = $em->getRepository(BaseProduct::class)->find($id);
@@ -154,46 +133,32 @@ class ProductController extends AbstractController
             throw new \LogicException('Unknown product type');
         }
 
-
         $workflow = $workflowRegistry->get($product);
         $statusChoices = array_keys($workflow->getDefinition()->getPlaces());
 
         $form = $this->createForm($formClass, $product, [
             'status_choices' => $statusChoices,
             'is_admin' => $this->isGranted('ROLE_ADMIN'),
+            'user' => $this->getUser(),
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Process image uploads/removals
-            $existingImages = $product->getImagePaths() ?? [];
-            $uploadedFiles = $form->get('imageFiles')->getData();
-            $existingImages = $imageHandler->processUploads($uploadedFiles, $existingImages);
+            $productFormHandler->handleProductForm($form, $request, $product, $this->getUser());
 
-            $removedImagesJson = $request->request->get('removedImages');
-            $removedImages = $removedImagesJson ? json_decode($removedImagesJson, true) : [];
-            $existingImages = $imageHandler->processRemovals($removedImages, $existingImages);
-
-            $product->setImagePaths($existingImages);
-
-            if ($product->getStatus() === "published") {
-                $workflowService->applyTransition($product, 'draft_from_published');
-            }
-
-            $em->flush();
-            $this->addFlash('success', 'Product updated successfully.');
+            $this->addFlash('success', 'Product created successfully.');
             return $this->redirectToRoute('app_dashboard');
         }
 
         return $this->render('product/edit.html.twig', [
-            'form'    => $form->createView(),
-            'type'    => $type,
+            'form' => $form->createView(),
+            'type' => $type,
             'product' => $product,
         ]);
     }
 
     /**
-     * @throws DateMalformedStringException
+     * @throws \DateMalformedStringException
      * @throws ExceptionInterface
      */
     #[Route('/product/publish/{id}', name: 'app_product_publish', methods: ['POST'])]
@@ -213,7 +178,7 @@ class ProductController extends AbstractController
             throw $this->createAccessDeniedException('You are not allowed to publish this product.');
         }
 
-        $durationWeeks = (int) $request->request->get('durationWeeks');
+        $durationWeeks = (int)$request->request->get('durationWeeks');
         if (!in_array($durationWeeks, [1, 2, 3, 4])) {
             $this->addFlash('error', 'Invalid duration selected.');
             return $this->redirectToRoute('app_dashboard');
@@ -224,9 +189,9 @@ class ProductController extends AbstractController
         $product->setPublishDate($now);
         $product->setExpiryDate($expiryDate);
 
-        if($product->getStatus() === 'draft') {
+        if ($product->getStatus() === 'draft') {
             $workflowService->applyTransition($product, 'publish');
-        }elseif($product->getStatus() === 'expired') {
+        } elseif ($product->getStatus() === 'expired') {
             $workflowService->applyTransition($product, 're_publish');
         } else {
             $this->addFlash('error', 'This product is already published.');
@@ -298,6 +263,17 @@ class ProductController extends AbstractController
         return $this->redirectToRoute('app_dashboard', [], Response::HTTP_SEE_OTHER);
     }
 
+    #[IsGranted('ROLE_USER')]
+    #[Route('/get-models', name: 'get_car_models', methods: ['POST'])]
+    public function getCarModels(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $brand = $data['brand'] ?? null;
 
+        if (!$brand || !array_key_exists($brand, CarData::getCarBrands())) {
+            return new JsonResponse(['error' => 'Invalid brand: ' . $brand], 400);
+        }
 
+        return new JsonResponse(CarData::getModelsByBrand($brand));
+    }
 }

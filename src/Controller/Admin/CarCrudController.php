@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Car;
 use App\Form\CarType;
+use App\Service\ProductFormHandler;
 use App\Service\ProductImageHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -29,7 +30,8 @@ class CarCrudController extends AbstractCrudController
         private readonly ProductImageHandler $imageHandler,
         private readonly EntityManagerInterface $entityManager,
         private readonly Registry $workflowRegistry,
-        private readonly MessageBusInterface $bus
+        private readonly MessageBusInterface $bus,
+        protected ProductFormHandler $productFormHandler
     ) {}
 
     public static function getEntityFqcn(): string
@@ -61,7 +63,8 @@ class CarCrudController extends AbstractCrudController
             ->overrideTemplates([
                 'crud/new'  => 'product/new.html.twig',
                 'crud/edit' => 'product/edit.html.twig',
-            ]);
+            ])
+            ->setSearchFields(['title', 'description', 'user.email']);
     }
 
     /**
