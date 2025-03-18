@@ -1,38 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'product/base_product_show.html.twig' %}
 
-{% block title %}Phone{% endblock %}
-
-{% block body %}
-    <h1>Phone</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ phone.id }}</td>
-            </tr>
-            <tr>
-                <th>Brand</th>
-                <td>{{ phone.brand }}</td>
-            </tr>
-            <tr>
-                <th>Model</th>
-                <td>{{ phone.model }}</td>
-            </tr>
-            <tr>
-                <th>Memory</th>
-                <td>{{ phone.memory }}</td>
-            </tr>
-            <tr>
-                <th>ProductCondition</th>
-                <td>{{ phone.productCondition }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_phone_index') }}">back to list</a>
-
-    {% if phone.user == app.user %}
-        <a href="{{ path('app_product_edit', {'id': phone.id}) }}">edit</a>
-    {% endif %}
+{% block extra_details %}
+    <tr>
+        <th>Condition</th>
+        <td>{{ product.productCondition }}</td>
+    </tr>
+    <tr>
+        <th>Memory (gb)</th>
+        <td>{{ product.memory }}</td>
+    </tr>
 {% endblock %}

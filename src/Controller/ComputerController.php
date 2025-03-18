@@ -50,7 +50,7 @@ final class ComputerController extends AbstractController
     public function show(Computer $computer): Response
     {
         return $this->render('computer/show.html.twig', [
-            'computer' => $computer,
+            'product' => $computer,
         ]);
     }
 

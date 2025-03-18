@@ -97,6 +97,8 @@
         <a href="{{ path('app_product_new_type', {'type': 'phone'}) }}">Create New</a>
     {% endif %}
 
+    <a href="{{ path('app_index') }}">Back</a>
+
     <div>
         {% if page > 1 %}
             <a href="{{ path('app_phone_index', filters|merge({'page': page - 1})) }}">Previous</a>

@@ -127,7 +127,7 @@
                 <td>{{ car.price }}</td>
                 <td>
                     <a href="{{ path('app_car_show', {'id': car.id}) }}">show</a>
-                    {% if car.user == app.user %}
+                    {% if car.user == app.user or is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('app_product_edit', {'id': car.id}) }}">edit</a>
                     {% endif %}
                 </td>
@@ -142,6 +142,7 @@
     {% if app.user %}
         <a href="{{ path('app_product_new_type', {'type': 'car'}) }}">Create new</a>
     {% endif %}
+        <a href="{{ path('app_car_select_brand') }}">Back</a>
 
     <!-- Pagination -->
     <div>

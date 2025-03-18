@@ -1,42 +1,16 @@
-{% extends 'base.html.twig' %}
+{% extends 'product/base_product_show.html.twig' %}
 
-{% block title %}Computer{% endblock %}
-
-{% block body %}
-    <h1>Computer</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ computer.id }}</td>
-            </tr>
-            <tr>
-                <th>Brand</th>
-                <td>{{ computer.brand }}</td>
-            </tr>
-            <tr>
-                <th>Model</th>
-                <td>{{ computer.model }}</td>
-            </tr>
-            <tr>
-                <th>Ram</th>
-                <td>{{ computer.ram }}</td>
-            </tr>
-            <tr>
-                <th>Storage</th>
-                <td>{{ computer.storage }}</td>
-            </tr>
-            <tr>
-                <th>ProductCondition</th>
-                <td>{{ computer.productCondition }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_computer_index') }}">back to list</a>
-
-    {% if computer.user == app.user %}
-        <a href="{{ path('app_product_edit', {'id': computer.id}) }}">edit</a>
-    {% endif %}
+{% block extra_details %}
+    <tr>
+        <th>Condition</th>
+        <td>{{ product.productCondition }}</td>
+    </tr>
+    <tr>
+        <th>Storage (gb)</th>
+        <td>{{ product.storage }}</td>
+    </tr>
+    <tr>
+        <th>RAM (gb)</th>
+        <td>{{ product.ram }}</td>
+    </tr>
 {% endblock %}

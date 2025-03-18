@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block body %}
+    <h1>{{ product.title }}</h1>
+
+    {% include 'product/_gallery.html.twig' with { 'images': product.imagePaths } %}
+
+    <table class="table">
+        <tbody>
+        <tr>
+            <th>Description</th>
+            <td>{{ product.description }}</td>
+        </tr>
+        <tr>
+            <th>Price</th>
+            <td>{{ product.price }} €</td>
+        </tr>
+        <tr>
+            <th>Published</th>
+            <td>{{ product.publishDate ? product.publishDate|date('Y-m-d') : 'Not published' }}</td>
+        </tr>
+
+        <tr>
+            <th>Contact info</th>
+            <td>{{ product.user.email }}</td>
+        </tr>
+        {% block extra_details %}{% endblock %}
+        </tbody>
+    </table>
+
+    {% if product.user == app.user %}
+        <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+    {% endif %}
+
+    <a href="#" onclick="window.history.back(); return false;">Back</a>
+
+{% endblock %}

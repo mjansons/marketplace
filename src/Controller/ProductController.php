@@ -146,7 +146,7 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $productFormHandler->handleProductForm($form, $request, $product, $this->getUser());
 
-            $this->addFlash('success', 'Product created successfully.');
+            $this->addFlash('success', 'Product saved successfully.');
             return $this->redirectToRoute('app_dashboard');
         }
 

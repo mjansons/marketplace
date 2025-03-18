@@ -45,7 +45,7 @@ final class PhoneController extends AbstractController
     public function show(Phone $phone): Response
     {
         return $this->render('phone/show.html.twig', [
-            'phone' => $phone,
+            'product' => $phone,
         ]);
     }
 

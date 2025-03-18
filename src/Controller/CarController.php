@@ -83,7 +83,7 @@ final class CarController extends AbstractController
     public function show(Car $car): Response
     {
         return $this->render('car/show.html.twig', [
-            'car' => $car,
+            'product' => $car,
         ]);
     }
 

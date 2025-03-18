@@ -77,6 +77,7 @@ final class PageController extends AbstractController
 
             $entityManager->flush();
 
+            $this->addFlash('success', 'Changes have been saved.');
             return $this->redirectToRoute('app_profile');
         }
 

@@ -1,44 +1,24 @@
-{% extends 'base.html.twig' %}
+{% extends 'product/base_product_show.html.twig' %}
 
-{% block title %}Car{% endblock %}
-
-{% block body %}
-    <h1>Car</h1>
-
-    {% include 'product/_gallery.html.twig' with { 'images': car.imagePaths } %}
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ car.id }}</td>
-            </tr>
-            <tr>
-                <th>Year</th>
-                <td>{{ car.year }}</td>
-            </tr>
-            <tr>
-                <th>Volume</th>
-                <td>{{ car.volume }}</td>
-            </tr>
-            <tr>
-                <th>Brand</th>
-                <td>{{ car.brand }}</td>
-            </tr>
-            <tr>
-                <th>Model</th>
-                <td>{{ car.model }}</td>
-            </tr>
-            <tr>
-                <th>Run</th>
-                <td>{{ car.run }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_car_index') }}">back to list</a>
-
-    {% if car.user == app.user %}
-        <a href="{{ path('app_product_edit', {'id': car.id}) }}">edit</a>
-    {% endif %}
+{% block extra_details %}
+    <tr>
+        <th>Year</th>
+        <td>{{ product.year }}</td>
+    </tr>
+    <tr>
+        <th>Volume</th>
+        <td>{{ product.volume }}</td>
+    </tr>
+    <tr>
+        <th>Brand</th>
+        <td>{{ product.brand }}</td>
+    </tr>
+    <tr>
+        <th>Model</th>
+        <td>{{ product.model }}</td>
+    </tr>
+    <tr>
+        <th>Run</th>
+        <td>{{ product.run }}</td>
+    </tr>
 {% endblock %}

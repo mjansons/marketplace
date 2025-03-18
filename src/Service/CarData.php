@@ -10,7 +10,7 @@ class CarData
             'Volkswagen' => 'Volkswagen',
             'Audi'       => 'Audi',
             'Mercedes'   => 'Mercedes',
-            'BMW'        => 'BMW',
+            'Bmw'        => 'Bmw',
             'Skoda'      => 'Skoda',
         ];
     }
@@ -49,7 +49,7 @@ class CarData
             'Volkswagen' => ['Golf', 'Passat', 'Tiguan'],
             'Audi'       => ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'],
             'Mercedes'   => ['C-Class', 'E-Class', 'S-Class'],
-            'BMW'        => ['3 Series', '5 Series', '7 Series'],
+            'Bmw'        => ['3 Series', '5 Series', '7 Series'],
             'Skoda'      => ['Fabia', 'Octavia', 'Superb'],
             default      => [],
         };
