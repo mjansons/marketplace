@@ -1,4 +1,18 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
-{{ form_end(form) }}
+<div class="custom-form">
+    <div class="form-input-div">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email, { 'attr': {'class': 'custom-input'} }) }}
+    </div>
+
+    <div class="form-input-div">
+        {{ form_label(form.plainPassword.first) }}
+        {{ form_widget(form.plainPassword.first, { 'attr': {'class': 'custom-input'} }) }}
+    </div>
+
+    <div class="form-input-div">
+        {{ form_label(form.plainPassword.second) }}
+        {{ form_widget(form.plainPassword.second, { 'attr': {'class': 'custom-input'} }) }}
+    </div>
+    <button class="btn green-btn" >{{ button_label|default('Save') }}</button>
+    {{ form_end(form) }}
+</div>

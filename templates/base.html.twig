@@ -15,16 +15,18 @@
     {% block header %}
         <header>
             <nav>
-                <div>
-                    <a href="{{ path('app_index') }}">HOME</a>
+                <div class="left-content">
+                    <a href="{{ path('app_index') }}">home</a>
                 </div>
-                {% if not app.user %}
-                    <div><a href="{{ path('app_login') }}">LOGIN</a></div>
-                    <div><a href="{{ path('app_register') }}">SIGNUP</a></div>
-                {% else %}
-                    <div><a href="{{ path('app_dashboard') }}">DASHBOARD</a></div>
-                    <div><a href="{{ path('app_profile') }}">PROFILE</a></div>
-                {% endif %}
+                <div class="right-content">
+                    {% if not app.user %}
+                        <div><a href="{{ path('app_login') }}">log in</a></div>
+                        <div><a href="{{ path('app_register') }}">sign up</a></div>
+                    {% else %}
+                        <div><a href="{{ path('app_dashboard') }}">dashboard</a></div>
+                        <div><a href="{{ path('app_profile') }}">profile</a></div>
+                    {% endif %}
+                </div>
             </nav>
         </header>
     {% endblock %}

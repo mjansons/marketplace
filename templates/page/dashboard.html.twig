@@ -2,20 +2,8 @@
 
 {% block title %}Dashboard{% endblock %}
 
-{% block header %}
-    <header>
-        <nav>
-            <div>
-                <a href="{{ path('app_index') }}">HOME</a>
-            </div>
-            <div>
-                <a href="{{ path('app_profile') }}">PROFILE</a>
-            </div>
-        </nav>
-    </header>
-{% endblock %}
-
 {% block body %}
+    <main>
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div class="alert alert-{{ label }}">
@@ -25,18 +13,22 @@
     {% endfor %}
     <div>
         <h1>Dashboard</h1>
-        <button onclick="window.location.href='{{ path('app_product_new') }}'">Create New</button>
+        <button class="blue-btn" onclick="window.location.href='{{ path('app_product_new') }}'">+ New Ad</button>
 
         <h3>Active</h3>
         {% if activeProducts is not empty %}
             <ul>
                 {% for product in activeProducts %}
                     <li>
+                        <div class="left-content">
                         {{ product.title }} - Expires on: {{ product.expiryDate ? product.expiryDate|date('Y-m-d') : 'N/A' }}
-                        <a href="{{ path('app_product_edit', {'id': product.id}) }}">Edit</a>
+                        </div>
+
+                        <div class="right-content">
                         <form action="{{ path('app_product_unpublish', {'id': product.id}) }}" method="post" style="display:inline-block;">
-                            <button type="submit">Unpublish</button>
-                        </form>
+                            <button type="submit" class="red-btn">unpublish</button>
+                        </form><a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
@@ -49,21 +41,27 @@
             <ul>
                 {% for product in drafts %}
                     <li>
+                        <div class="left-content">
                         {{ product.title }} -
-                        <a href="{{ path('app_product_edit', {'id': product.id}) }}">Edit</a>
-                        {# Inline Publish Form for Drafts #}
-                        <form action="{{ path('app_product_publish', {'id': product.id}) }}" method="post" style="display:inline-block;">
-                            <label>
-                                <select name="durationWeeks" required>
-                                    <option value="">Select Duration</option>
-                                    <option value="1">1 Week</option>
-                                    <option value="2">2 Weeks</option>
-                                    <option value="3">3 Weeks</option>
-                                    <option value="4">4 Weeks</option>
-                                </select>
-                            </label>
-                            <button type="submit">Publish</button>
-                        </form>
+
+                        </div>
+
+                        <div class="right-content">
+
+                            <form action="{{ path('app_product_publish', {'id': product.id}) }}" method="post" style="display:inline-block;">
+                                <label>
+                                    <select name="durationWeeks" required>
+                                        <option value="">Select Duration</option>
+                                        <option value="1">1 Week</option>
+                                        <option value="2">2 Weeks</option>
+                                        <option value="3">3 Weeks</option>
+                                        <option value="4">4 Weeks</option>
+                                    </select>
+                                </label>
+                                <button type="submit" class="green-btn">publish</button>
+                            </form>
+                            <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
@@ -98,4 +96,5 @@
             <p>No expired products.</p>
         {% endif %}
     </div>
+    </main>
 {% endblock %}

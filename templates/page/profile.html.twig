@@ -2,37 +2,37 @@
 
 {% block title %}Edit User{% endblock %}
 
-{% block header %}
-    <header>
-        <nav>
-            <div>
-                <a href="{{ path('app_index')}}">HOME</a>
-            </div>
-                <div>
-                    <a href="{{ path('app_dashboard')}}">DASHBOARD</a>
+{% block body %}
+    <main>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
                 </div>
-        </nav>
-    </header>
+            {% endfor %}
+        {% endfor %}
+
+        <h1>My Profile</h1>
+
+        {{ include('user/_form.html.twig', {'button_label': 'update'}) }}
+
+        <div class="bottom-buttons">
+            <a href="{{ path('app_logout') }}">log out</a>
+            {{ include('user/_delete_form.html.twig') }}
+        </div>
+
+    </main>
 {% endblock %}
 
-
-{% block body %}
-
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    <h1>My Profile</h1>
-
-    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
-
-    {{ include('user/_delete_form.html.twig') }}
-
-    <div>
-        <a href="{{ path('app_logout')}}">LOG OUT</a>
-    </div>
+{% block stylesheets %}
+    <style>
+        .bottom-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
 {% endblock %}

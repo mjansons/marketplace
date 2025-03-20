@@ -17,21 +17,129 @@ Black 900 Italic */
     font-family: Roboto, sans-serif;
 }
 
-a {
-    text-decoration: none;
-}
 
 html, body {
     height: 100%;
     padding: 0;
     margin: 0;
+    background: #bfbfbf;
 }
 
 nav {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    padding: 16px;
+    background: #dadada;
 }
+
+.right-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+}
+
+a {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #474747;
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+a:active {
+    opacity: 0.5;
+}
+
+button {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #474747;
+    border-radius: 8px;
+    font-size: 16px;
+    color: white;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+button:active {
+    opacity: 0.5;
+}
+
+.green-btn {
+    background-color: #76ae76;
+}
+
+.red-btn {
+    background-color: #bd5e5e;
+}
+
+.blue-btn {
+    background-color: #6c84c6;
+}
+
+.custom-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    justify-content: center;
+    gap: 16px;
+}
+
+input, select {
+    padding: 8px 12px;
+    font-size: 16px;
+    font-family: Roboto, sans-serif;
+    background-color: #dadada;;
+    border-radius: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+}
+
+.form-input-div {
+    display: flex;
+    flex-direction: column;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 8px;
+}
+li {
+    padding: 8px 24px;
+    background-color: #dadada;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
 
 /* Flash message container */
 .alert {
