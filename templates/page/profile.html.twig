@@ -23,7 +23,6 @@
 
     </main>
 {% endblock %}
-
 {% block stylesheets %}
     <style>
         .bottom-buttons {
@@ -32,7 +31,30 @@
             gap: 16px;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 16px;
+            width: 100%;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .bottom-buttons a,
+        .bottom-buttons .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .bottom-buttons form {
+            width: 100%;
+        }
+
+        .custom-form {
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            min-width: 320px;
         }
     </style>
 {% endblock %}

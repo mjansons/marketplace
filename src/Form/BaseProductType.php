@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -23,7 +24,11 @@ class BaseProductType extends AbstractType
     {
         $builder
             ->add('title', TextType::class)
-            ->add('description', TextType::class)
+            ->add('description', TextareaType::class, [
+                'attr' => [
+                    'rows' => 3,
+                ]
+            ])
             ->add('price', IntegerType::class, [
                 'attr' => ['min' => 0]
             ]);

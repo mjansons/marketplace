@@ -56,6 +56,7 @@ a {
     transition: background-color 0.3s ease;
     border: none;
     cursor: pointer;
+    text-align: center;
 }
 
 a:hover {
@@ -76,6 +77,7 @@ button {
     transition: background-color 0.3s ease;
     border: none;
     cursor: pointer;
+    text-align: center;
 }
 
 button:hover {
@@ -101,12 +103,12 @@ button:active {
 .custom-form {
     display: flex;
     flex-direction: column;
-    max-width: 400px;
+    max-width: 600px;
     justify-content: center;
     gap: 16px;
 }
 
-input, select {
+input, select, textarea {
     padding: 8px 12px;
     font-size: 16px;
     font-family: Roboto, sans-serif;
@@ -114,6 +116,7 @@ input, select {
     border-radius: 8px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     outline: none;
+    border: none;
 }
 
 .form-input-div {
@@ -144,12 +147,16 @@ li {
 /* Flash message container */
 .alert {
     position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     margin: 10px auto;
     padding: 15px;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: 16px;
     font-size: 16px;
     z-index: 10;
+    opacity: 80%;
 }
 
 /* Success messages */

@@ -74,8 +74,13 @@
             <ul>
                 {% for product in expiredProducts %}
                     <li>
+                        <div class="left-content">
                         {{ product.title }} -
-                        <a href="{{ path('app_product_edit', {'id': product.id}) }}">Edit</a>
+
+                        </div>
+
+                        <div class="right-content">
+
                         {# Inline Publish Form for Expired Products #}
                         <form action="{{ path('app_product_publish', {'id': product.id}) }}" method="post" style="display:inline-block;">
                             <label>
@@ -87,8 +92,10 @@
                                     <option value="4">4 Weeks</option>
                                 </select>
                             </label>
-                            <button type="submit">Re-publish</button>
+                            <button type="submit" class="green-btn">re-publish</button>
                         </form>
+                            <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>

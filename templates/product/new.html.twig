@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block body %}
+    <main>
     {% if form is not defined and new_form is defined %}
         {% set form = new_form %}
     {% endif %}
@@ -38,20 +39,64 @@
         {{ form_errors(form.imageFiles) }}
     </div>
 
+    {% for field in form %}
+        {% if not field.rendered and field.vars.block_prefixes[1] != 'hidden' %}
+            <div class="form-input-div">
+                {{ form_label(field) }}
+                {{ form_widget(field) }}
+                {{ form_errors(field) }}
+            </div>
+        {% endif %}
+    {% endfor %}
+
     {{ form_rest(form) }}
 
-    <button class="btn btn-primary">Save</button>
+    <button class="btn btn-primary green-btn">save</button>
     {{ form_end(form) }}
 
+        <div class="bottom-buttons">
     {% set referrer = app.request.headers.get('referer') %}
     {% if referrer is not empty %}
-        <a href="{{ referrer }}">Back</a>
+        <a href="{{ referrer }}">back</a>
     {% else %}
         {# Fallback based on role #}
         {% if isAdmin %}
-            <a href="{{ path('admin_car_index') }}">Back to admin dashboard</a>
-        {% else %}
-            <a href="{{ path('app_dashboard') }}">Back to user dashboard</a>
+            <a href="{{ path('admin_car_index') }}">back to admin dashboard</a>
         {% endif %}
     {% endif %}
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            justify-content: center;
+            gap: 16px;
+            margin: 0 auto;
+        }
+
+        .bottom-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            margin: 0 auto;
+            max-width: 800px;
+            margin-top: 16px;
+        }
+
+        .bottom-buttons form {
+            width: 100%;
+        }
+
+        .green-btn {
+            width: 100%;
+        }
+
+
+    </style>
 {% endblock %}

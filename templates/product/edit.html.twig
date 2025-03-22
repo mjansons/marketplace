@@ -1,4 +1,3 @@
-{# templates/product/edit.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}
@@ -6,44 +5,91 @@
 {% endblock %}
 
 {% block body %}
-    {% if form is not defined and edit_form is defined %}
-        {% set form = edit_form %}
-    {% endif %}
-
-    <h2>Edit {{ type|capitalize }} ad</h2>
-
-    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
-
-    {# The partial for multiple image UI #}
-    {% include 'product/_image_upload.html.twig' with {
-        'product': product|default(null),
-        'form': form
-    } %}
-    {% do form.imageFiles.setRendered() %}
-
-    <div class="form-errors">
-        {{ form_errors(form.imageFiles) }}
-    </div>
-
-    {{ form_rest(form) }}
-    <button class="btn btn-primary">Save Changes</button>
-    {{ form_end(form) }}
-
-    {{ include('product/_delete_form.html.twig', { product: product }) }}
-
-    {% set referrer = app.request.headers.get('referer') %}
-    {% if referrer is not empty %}
-        <a href="{{ referrer }}">Back</a>
-    {% else %}
-        {# Fallback based on role #}
-        {% if isAdmin %}
-            <a href="{{ path('admin_car_index') }}">Back to admin dashboard</a>
-        {% else %}
-            <a href="{{ path('app_dashboard') }}">Back to user dashboard</a>
+    <main>
+        {% if form is not defined and edit_form is defined %}
+            {% set form = edit_form %}
         {% endif %}
-    {% endif %}
 
-    {% if type == 'car' %}
-        <script src="{{ asset('js/car-models.js') }}"></script>
-    {% endif %}
+        <h2>Edit {{ type|capitalize }} ad</h2>
+
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+        {# The partial for multiple image UI #}
+        {% include 'product/_image_upload.html.twig' with {
+            'product': product|default(null),
+            'form': form
+        } %}
+        {% do form.imageFiles.setRendered() %}
+
+        <div class="form-errors">
+            {{ form_errors(form.imageFiles) }}
+        </div>
+
+        {% for field in form %}
+            {% if not field.rendered and field.vars.block_prefixes[1] != 'hidden' %}
+                <div class="form-input-div">
+                    {{ form_label(field) }}
+                    {{ form_widget(field) }}
+                    {{ form_errors(field) }}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        {{ form_rest(form) }}
+
+        <button class="green-btn">save changes</button>
+        {{ form_end(form) }}
+
+        <div class="bottom-buttons">
+            {{ include('product/_delete_form.html.twig', { product: product }) }}
+
+            {# Return buttons #}
+            {% set referrer = app.request.headers.get('referer') %}
+            {% if referrer is not empty %}
+                <a href="{{ referrer }}">back</a>
+            {% else %}
+                {% if isAdmin %}
+                    <a href="{{ path('admin_car_index') }}">back to admin dashboard</a>
+                {% endif %}
+            {% endif %}
+
+            {% if type == 'car' %}
+                <script src="{{ asset('js/car-models.js') }}"></script>
+            {% endif %}
+        </div>
+
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            justify-content: center;
+            gap: 16px;
+            margin: 0 auto;
+        }
+
+        .bottom-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            margin: 0 auto;
+            max-width: 800px;
+            margin-top: 16px;
+        }
+
+        .bottom-buttons form {
+            width: 100%;
+        }
+
+        .red-btn {
+            width: 100%;
+        }
+
+
+    </style>
 {% endblock %}

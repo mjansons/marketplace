@@ -3,10 +3,45 @@
 {% block title %}Create New Product{% endblock %}
 
 {% block body %}
+    <main>
     <h2>Choose Product Type</h2>
 
     {{ form_start(chooseForm) }}
     {{ form_widget(chooseForm) }}
-    <button class="btn btn-primary">Continue</button>
+    <button class="btn btn-primary">continue</button>
     {{ form_end(chooseForm) }}
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        main {
+            justify-content: center;
+            margin: 0 auto;
+            width: max-content;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            & label {
+                display: none;
+            }
+
+            & select {
+                width: 100%;
+            }
+
+            & button {
+                width: 100%;
+
+            }
+        }
+
+        h2 {
+            align-self: flex-start;
+        }
+    </style>
 {% endblock %}
