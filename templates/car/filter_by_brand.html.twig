@@ -3,155 +3,185 @@
 {% block title %}{{ selectedBrand|capitalize }} Cars{% endblock %}
 
 {% block body %}
-    <h1>{{ selectedBrand|capitalize }} Cars</h1>
+    <main>
 
-    <!-- Filter Form -->
-    <form method="get">
-        <label>
-            Model:
-            <select name="model">
-                <option value="">All Models</option>
-                {% for model in models %}
-                    <option value="{{ model }}" {{ filters.model == model ? 'selected' : '' }}>{{ model }}</option>
-                {% endfor %}
-            </select>
-        </label>
 
-        <label>
-            Min Year:
-            <select name="minYear">
-                <option value="">Any</option>
-                {% for year in years %}
-                    <option value="{{ year }}" {{ filters.minYear == year ? 'selected' : '' }}>{{ year }}</option>
-                {% endfor %}
-            </select>
-        </label>
+        <h1>{{ selectedBrand|capitalize }} Cars</h1>
 
-        <label>
-            Max Year:
-            <select name="maxYear">
-                <option value="">Any</option>
-                {% for year in years %}
-                    <option value="{{ year }}" {{ filters.maxYear == year ? 'selected' : '' }}>{{ year }}</option>
-                {% endfor %}
-            </select>
-        </label>
+        <!-- Filter Form -->
+        <form method="get">
+            <label>
+                Model:
+                <select name="model">
+                    <option value="">All Models</option>
+                    {% for model in models %}
+                        <option value="{{ model }}" {{ filters.model == model ? 'selected' : '' }}>{{ model }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-        <label>
-            Min Volume:
-            <select name="minVolume">
-                <option value="">Any</option>
-                {% for volume in volumes %}
-                    <option value="{{ volume }}" {{ filters.minVolume == volume ? 'selected' : '' }}>{{ volume }}</option>
-                {% endfor %}
-            </select>
-        </label>
+            <label>
+                Min Year:
+                <select name="minYear">
+                    <option value="">Any</option>
+                    {% for year in years %}
+                        <option value="{{ year }}" {{ filters.minYear == year ? 'selected' : '' }}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-        <label>
-            Max Volume:
-            <select name="maxVolume">
-                <option value="">Any</option>
-                {% for volume in volumes %}
-                    <option value="{{ volume }}" {{ filters.maxVolume == volume ? 'selected' : '' }}>{{ volume }}</option>
-                {% endfor %}
-            </select>
-        </label>
+            <label>
+                Max Year:
+                <select name="maxYear">
+                    <option value="">Any</option>
+                    {% for year in years %}
+                        <option value="{{ year }}" {{ filters.maxYear == year ? 'selected' : '' }}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-        <label>
-            Min Run (km):
-            <input type="number" name="minRun" value="{{ filters.minRun ?? '' }}" min="0">
-        </label>
+            <label>
+                Min Volume:
+                <select name="minVolume">
+                    <option value="">Any</option>
+                    {% for volume in volumes %}
+                        <option value="{{ volume }}" {{ filters.minVolume == volume ? 'selected' : '' }}>{{ volume }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-        <label>
-            Max Run (km):
-            <input type="number" name="maxRun" value="{{ filters.maxRun ?? '' }}" min="0">
-        </label>
+            <label>
+                Max Volume:
+                <select name="maxVolume">
+                    <option value="">Any</option>
+                    {% for volume in volumes %}
+                        <option value="{{ volume }}" {{ filters.maxVolume == volume ? 'selected' : '' }}>{{ volume }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-        <label>
-            Min Price:
-            <input type="number" name="minPrice" value="{{ filters.minPrice ?? '' }}" min="0">
-        </label>
+            <label>
+                Min Run (km):
+                <input type="number" name="minRun" value="{{ filters.minRun ?? '' }}" min="0">
+            </label>
 
-        <label>
-            Max Price:
-            <input type="number" name="maxPrice" value="{{ filters.maxPrice ?? '' }}" min="0">
-        </label>
+            <label>
+                Max Run (km):
+                <input type="number" name="maxRun" value="{{ filters.maxRun ?? '' }}" min="0">
+            </label>
 
-        <button type="submit">Filter</button>
-    </form>
+            <label>
+                Min Price:
+                <input type="number" name="minPrice" value="{{ filters.minPrice ?? '' }}" min="0">
+            </label>
 
-    <!-- Cars Table with Sorting Links -->
-    <table>
-        <tr>
-            <td>Image</td>
-            <th>
-                <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'year', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Year
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Model
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'volume', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Volume
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'run', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Run
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Price
-                </a>
-            </th>
-            <th>Actions</th>
-        </tr>
-        {% for car in cars %}
+            <label>
+                Max Price:
+                <input type="number" name="maxPrice" value="{{ filters.maxPrice ?? '' }}" min="0">
+            </label>
+
+            <button type="submit">filter</button>
+        </form>
+
+        <!-- Cars Table with Sorting Links -->
+        <table>
             <tr>
-                <td>
-                    {% if car.imagePaths is not empty %}
-                        <img src="{{ asset('uploads/products/' ~ car.imagePaths|first) }}" alt="Car Thumbnail" width="50" height="50">
-                    {% else %}
-                        <img src="{{ asset('uploads/products/no_image.png') }}" alt="Image Thumbnail" width="50" height="50">
-                    {% endif %}
-                </td>
-                <td>{{ car.year }}</td>
-                <td>{{ car.model }}</td>
-                <td>{{ car.volume }}</td>
-                <td>{{ car.run }}</td>
-                <td>{{ car.price }}</td>
-                <td>
-                    <a href="{{ path('app_car_show', {'id': car.id}) }}">show</a>
-                    {% if car.user == app.user or is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_product_edit', {'id': car.id}) }}">edit</a>
-                    {% endif %}
-                </td>
+                <td></td>
+                <th>
+                    <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'year', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Year
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Model
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'volume', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Volume
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'run', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Run
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_car_filter_by_brand', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Price
+                    </a>
+                </th>
+                <th>Actions</th>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">No results found.</td>
-            </tr>
-        {% endfor %}
-    </table>
+            {% for car in cars %}
+                <tr>
+                    <td>
+                        {% if car.imagePaths is not empty %}
+                            <img src="{{ asset('uploads/products/' ~ car.imagePaths|first) }}" alt="Car Thumbnail"
+                                 width="50" height="50">
+                        {% else %}
+                            <img src="{{ asset('uploads/products/no_image.png') }}" alt="Image Thumbnail" width="50"
+                                 height="50">
+                        {% endif %}
+                    </td>
+                    <td>{{ car.year }}</td>
+                    <td>{{ car.model }}</td>
+                    <td>{{ car.volume }}</td>
+                    <td>{{ car.run }}</td>
+                    <td>{{ car.price }}</td>
+                    <td>
+                        <a href="{{ path('app_car_show', {'id': car.id}) }}">open</a>
+                        {% if car.user == app.user or is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_product_edit', {'id': car.id}) }}" class="blue-btn">edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7">No results found.</td>
+                </tr>
+            {% endfor %}
+        </table>
 
-    {% if app.user %}
-        <a href="{{ path('app_product_new_type', {'type': 'car'}) }}">Create new</a>
-    {% endif %}
-        <a href="{{ path('app_car_select_brand') }}">Back</a>
+        <div class="bottom-buttons">
+            {% if app.user %}
+                <a href="{{ path('app_product_new_type', {'type': 'car'}) }}" class="blue-btn">+ New Ad</a>
+            {% endif %}
+            <a href="{{ path('app_car_select_brand') }}">back</a>
+        </div>
 
-    <!-- Pagination -->
-    <div>
-        {% if page > 1 %}
-            <a href="{{ path('app_car_filter_by_brand', filters|merge({'page': page - 1})) }}">Previous</a>
-        {% endif %}
-        <span>Page {{ page }}</span>
-        {% if cars|length == 10 %}
-            <a href="{{ path('app_car_filter_by_brand', filters|merge({'page': page + 1})) }}">Next</a>
-        {% endif %}
-    </div>
+
+        <!-- Pagination -->
+        <div>
+            {% if page > 1 %}
+                <a href="{{ path('app_car_filter_by_brand', filters|merge({'page': page - 1})) }}">Previous</a>
+                <span>Page {{ page }}</span>
+            {% endif %}
+            {% if cars|length == 10 %}
+                <a href="{{ path('app_car_filter_by_brand', filters|merge({'page': page + 1})) }}">Next</a>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        table {
+            margin-top: 32px;
+        }
+
+        .bottom-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+    </style>
 {% endblock %}

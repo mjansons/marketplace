@@ -1,24 +1,29 @@
 {% extends 'product/base_product_show.html.twig' %}
 
 {% block extra_details %}
-    <tr>
-        <th>Year</th>
-        <td>{{ product.year }}</td>
-    </tr>
-    <tr>
-        <th>Volume</th>
-        <td>{{ product.volume }}</td>
-    </tr>
-    <tr>
-        <th>Brand</th>
-        <td>{{ product.brand }}</td>
-    </tr>
-    <tr>
-        <th>Model</th>
-        <td>{{ product.model }}</td>
-    </tr>
-    <tr>
-        <th>Run</th>
-        <td>{{ product.run }}</td>
-    </tr>
+    <div class="detail-card">
+        <span class="label">Brand</span>
+        <span class="value">{{ product.brand }}</span>
+    </div>
+
+    <div class="detail-card">
+        <span class="label">Model</span>
+        <span class="value">{{ product.model }}</span>
+    </div>
+
+    <div class="detail-card">
+        <span class="label">Year</span>
+        <span class="value">{{ product.year }}</span>
+    </div>
+
+    <div class="detail-card">
+        <span class="label">Volume</span>
+        <span class="value">{{ product.volume }}</span>
+    </div>
+
+    <div class="detail-card">
+        <span class="label">Run (km)</span>
+        <span class="value">{{ product.run }}</span>
+    </div>
+
 {% endblock %}

@@ -3,24 +3,70 @@
 {% block title %}Select Car Brand{% endblock %}
 
 {% block body %}
-    <h1>Select a Car Brand</h1>
+    <main>
 
-    <ul>
-        {% for brand, count in brandCounts %}
-            <li>
-                <a href="{{ path('app_car_filter_by_brand', { brand: brand|url_encode }) }}">
-                    {{ brand|capitalize }} ({{ count }})
-                </a>
-            </li>
-        {% else %}
-            <li>No brands available.</li>
-        {% endfor %}
-    </ul>
 
-    {% if app.user %}
-        <a href="{{ path('app_product_new_type', {'type': 'car'}) }}">Create new</a>
-    {% endif %}
+        <h1>Select a Car Brand</h1>
 
-    <a href="{{ path('app_index') }}">Back</a>
+        <ul>
+            {% if app.user %}
+                <a href="{{ path('app_product_new_type', {'type': 'car'}) }}" class="blue-btn">+ New Ad</a>
+            {% endif %}
 
+            {% for brand, count in brandCounts %}
+                <li>
+                    <a href="{{ path('app_car_filter_by_brand', { brand: brand|url_encode }) }}">
+                        {{ brand|capitalize }} ({{ count }})
+                    </a>
+                </li>
+            {% else %}
+                <li>No brands available.</li>
+            {% endfor %}
+
+
+        </ul>
+
+        <div class="bottom-buttons">
+
+
+            <a href="{{ path('app_index') }}" class="btn">Back</a>
+
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+            flex-wrap: wrap;
+            flex-shrink: 1;
+        }
+
+        ul {
+            flex-grow: 1;
+        }
+        li {
+            background-color: transparent;
+            padding: 0;
+            color: #bf2020;
+        }
+
+        .bottom-buttons {
+            margin: 16px auto 0;
+            display: flex;
+            align-self: flex-end;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+        }
+        .blue-btn {
+            width: fit-content;
+        }
+    </style>
 {% endblock %}

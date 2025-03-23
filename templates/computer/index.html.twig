@@ -3,120 +3,151 @@
 {% block title %}Computer Marketplace{% endblock %}
 
 {% block body %}
-    <h1>Computer Marketplace</h1>
 
-    <!-- Filter Form -->
-    <form method="get" action="{{ path('app_computer_index') }}">
-        <label>
-            Brand:
-            <input type="text" name="brand" value="{{ filters.brand ?? '' }}">
-        </label>
-        <label>
-            Model:
-            <input type="text" name="model" value="{{ filters.model ?? '' }}">
-        </label>
-        <label>
-            RAM (GB):
-            <input type="number" name="ram" value="{{ filters.ram ?? '' }}" min="0" step="1">
-        </label>
-        <label>
-            Storage (GB):
-            <input type="number" name="storage" value="{{ filters.storage ?? '' }}" min="0" step="1">
-        </label>
-        <label>
-            Condition:
-            <select name="productCondition">
-                <option value="">Any</option>
-                {% for condition, label in productConditions %}
-                    <option value="{{ condition }}" {{ filters.productCondition == condition ? 'selected' : '' }}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-        </label>
-        <label>
-            Min Price:
-            <input type="number" name="minPrice" value="{{ filters.minPrice ?? '' }}" min="0" step="1">
-        </label>
-        <label>
-            Max Price:
-            <input type="number" name="maxPrice" value="{{ filters.maxPrice ?? '' }}" min="0" step="1">
-        </label>
-        <button type="submit">Search</button>
-    </form>
+    <main>
 
-    <!-- Table with Sorting Links -->
-    <table>
-        <tr>
-            <td>Image</td>
-            <th>
-                <a href="{{ path('app_computer_index', filters|merge({'sort': 'brand', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Brand
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_computer_index', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Model
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_computer_index', filters|merge({'sort': 'ram', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    RAM (GB)
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_computer_index', filters|merge({'sort': 'storage', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Storage (GB)
-                </a>
-            </th>
-            <th>
-                <a href="{{ path('app_computer_index', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                    Price (€)
-                </a>
-            </th>
-        </tr>
-        {% for computer in computers %}
+
+        <h1>Computer Marketplace</h1>
+
+        <!-- Filter Form -->
+        <form method="get" action="{{ path('app_computer_index') }}">
+            <label>
+                Brand:
+                <input type="text" name="brand" value="{{ filters.brand ?? '' }}">
+            </label>
+            <label>
+                Model:
+                <input type="text" name="model" value="{{ filters.model ?? '' }}">
+            </label>
+            <label>
+                RAM (GB):
+                <input type="number" name="ram" value="{{ filters.ram ?? '' }}" min="0" step="1">
+            </label>
+            <label>
+                Storage (GB):
+                <input type="number" name="storage" value="{{ filters.storage ?? '' }}" min="0" step="1">
+            </label>
+            <label>
+                Condition:
+                <select name="productCondition">
+                    <option value="">Any</option>
+                    {% for condition, label in productConditions %}
+                        <option value="{{ condition }}" {{ filters.productCondition == condition ? 'selected' : '' }}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Min Price:
+                <input type="number" name="minPrice" value="{{ filters.minPrice ?? '' }}" min="0" step="1">
+            </label>
+            <label>
+                Max Price:
+                <input type="number" name="maxPrice" value="{{ filters.maxPrice ?? '' }}" min="0" step="1">
+            </label>
+            <button type="submit">filter</button>
+        </form>
+
+        <!-- Table with Sorting Links -->
+        <table>
             <tr>
-                <td>
-                    {% if computer.imagePaths is not empty %}
-                        <img src="{{ asset('uploads/products/' ~ computer.imagePaths|first) }}" alt="Computer Thumbnail" width="50" height="50">
-                    {% else %}
-                        <img src="{{ asset('uploads/products/no_image.png') }}" alt="Computer Thumbnail" width="50" height="50">
-                    {% endif %}
-                </td>
-                <td>{{ computer.brand }}</td>
-                <td>{{ computer.model }}</td>
-                <td>{{ computer.ram }}</td>
-                <td>{{ computer.storage }}</td>
-                <td>{{ computer.price }}</td>
-                <td>
-                    <a href="{{ path('app_computer_show', {'id': computer.id}) }}">show</a>
-                    {% if computer.user == app.user %}
-                        <a href="{{ path('app_product_edit', {'id': computer.id}) }}">edit</a>
-                    {% endif %}
-                </td>
+                <td></td>
+                <th>
+                    <a href="{{ path('app_computer_index', filters|merge({'sort': 'brand', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Brand
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_computer_index', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Model
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_computer_index', filters|merge({'sort': 'ram', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        RAM (GB)
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_computer_index', filters|merge({'sort': 'storage', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Storage (GB)
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ path('app_computer_index', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                        Price (€)
+                    </a>
+                </th>
+                <th>Actions</th>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">No results found.</td>
-            </tr>
-        {% endfor %}
-    </table>
+            {% for computer in computers %}
+                <tr>
+                    <td>
+                        {% if computer.imagePaths is not empty %}
+                            <img src="{{ asset('uploads/products/' ~ computer.imagePaths|first) }}"
+                                 alt="Computer Thumbnail" width="50" height="50">
+                        {% else %}
+                            <img src="{{ asset('uploads/products/no_image.png') }}" alt="Computer Thumbnail" width="50"
+                                 height="50">
+                        {% endif %}
+                    </td>
+                    <td>{{ computer.brand }}</td>
+                    <td>{{ computer.model }}</td>
+                    <td>{{ computer.ram }}</td>
+                    <td>{{ computer.storage }}</td>
+                    <td>{{ computer.price }}</td>
+                    <td>
+                        <a href="{{ path('app_computer_show', {'id': computer.id}) }}">show</a>
+                        {% if computer.user == app.user %}
+                            <a href="{{ path('app_product_edit', {'id': computer.id}) }}" class="blue-btn">edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7">No results found.</td>
+                </tr>
+            {% endfor %}
+        </table>
 
-    {% if app.user %}
-        <a href="{{ path('app_product_new_type', {'type': 'computer'}) }}">Create New</a>
-    {% endif %}
+        <div class="bottom-buttons">
+            {% if app.user %}
+                <a href="{{ path('app_product_new_type', {'type': 'computer'}) }}" class="blue-btn">+ New Ad</a>
+            {% endif %}
 
-    <a href="{{ path('app_index') }}">Back</a>
-
-    <div>
-        {% if page > 1 %}
-            <a href="{{ path('app_computer_index', filters|merge({'page': page - 1})) }}">Previous</a>
-        {% endif %}
-        <span>Page {{ page }}</span>
-        {% if computers|length == 10 %}
-            <a href="{{ path('app_computer_index', filters|merge({'page': page + 1})) }}">Next</a>
-        {% endif %}
-    </div>
-
+            <a href="{{ path('app_index') }}">back</a>
+        </div>
+        <div>
+            {% if page > 1 %}
+                <a href="{{ path('app_computer_index', filters|merge({'page': page - 1})) }}">Previous</a>
+                <span>Page {{ page }}</span>
+            {% endif %}
+            {% if computers|length == 10 %}
+                <a href="{{ path('app_computer_index', filters|merge({'page': page + 1})) }}">Next</a>
+            {% endif %}
+        </div>
+    </main>
 {% endblock %}
+
+{% block stylesheets %}
+    <style>
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        table {
+            margin-top: 32px;
+        }
+
+        .bottom-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+    </style>
+{% endblock %}
+

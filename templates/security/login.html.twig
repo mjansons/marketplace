@@ -3,35 +3,122 @@
 {% block title %}Log in!{% endblock %}
 
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+    <main>
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
-        </div>
-    {% endif %}
+        <form method="post">
+            {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+            {% if app.user %}
+                <div class="mb-3">
+                    You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+                </div>
+            {% endif %}
 
-    <input type="hidden" name="_csrf_token"
-           value="{{ csrf_token('authenticate') }}"
-    >
 
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" name="_remember_me"> Remember me
-        </label>
-    </div>
+            <div class="form-input-div">
+                <label for="inputEmail">Email</label>
+                <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control"
+                       autocomplete="email" required autofocus>
+            </div>
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+            <div class="form-input-div">
+            <label for="inputPassword">Password</label>
+            <input type="password" name="password" id="inputPassword" class="form-control"
+                   autocomplete="current-password" required>
+            </div>
+            <input type="hidden" name="_csrf_token"
+                   value="{{ csrf_token('authenticate') }}"
+            >
+
+            <div class="form-input-div checkbox-wrapper">
+                <label class="custom-checkbox">
+                    <input type="checkbox" name="_remember_me" class="hidden-checkbox">
+                    <span class="checkmark"></span>
+                    <span>Remember me</span>
+                </label>
+            </div>
+
+
+            <button class="btn btn-lg btn-primary" type="submit">
+                Sign in
+            </button>
+        </form>
+    </main>
+{% endblock %}
+
+
+{% block stylesheets %}
+    <style>
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+            flex-wrap: wrap;
+            flex-shrink: 1;
+        }
+
+        li {
+            background-color: transparent;
+            padding: 0;
+            color: #bf2020;
+        }
+
+        .form-input-div.checkbox-wrapper {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .hidden-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .custom-checkbox .checkmark {
+            width: 24px;
+            height: 24px;
+            background-color: #dadada;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            display: inline-block;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox .checkmark::after {
+            content: '✔';
+            color: white;
+            font-size: 16px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .hidden-checkbox:checked + .checkmark {
+            background-color: #444;
+        }
+
+        .hidden-checkbox:checked + .checkmark::after {
+            display: block;
+        }
+    </style>
 {% endblock %}

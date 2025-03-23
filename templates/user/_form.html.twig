@@ -1,18 +1,32 @@
 <div class="custom-form">
+    {{ form_start(form) }}
+    {{ form_errors(form.email) }}
     <div class="form-input-div">
         {{ form_label(form.email) }}
         {{ form_widget(form.email, { 'attr': {'class': 'custom-input'} }) }}
     </div>
-
+    {{ form_errors(form.plainPassword.first) }}
     <div class="form-input-div">
         {{ form_label(form.plainPassword.first) }}
         {{ form_widget(form.plainPassword.first, { 'attr': {'class': 'custom-input'} }) }}
     </div>
 
+    {{ form_errors(form.plainPassword.second) }}
     <div class="form-input-div">
         {{ form_label(form.plainPassword.second) }}
         {{ form_widget(form.plainPassword.second, { 'attr': {'class': 'custom-input'} }) }}
     </div>
-    <button class="btn green-btn" >{{ button_label|default('Save') }}</button>
+
+    <button type="submit" class="btn green-btn">{{ button_label|default('save') }}</button>
     {{ form_end(form) }}
 </div>
+
+{% block stylesheets %}
+    <style>
+        li {
+            background-color: transparent;
+            padding: 0;
+            color: #bf2020;
+        }
+    </style>
+{% endblock %}

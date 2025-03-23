@@ -8,8 +8,6 @@
                 <img src="{{ asset('uploads/products/' ~ image) }}" alt="Product Image" width="100">
             </a>
         {% endfor %}
-    {% else %}
-        <p>No images available.</p>
     {% endif %}
 </div>
 
@@ -30,9 +28,19 @@
         gap: 10px;
         flex-wrap: wrap;
     }
+    .gallery a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+        padding: 0px;
+        border-radius: 16px;
+    }
+
     .gallery a img {
         cursor: pointer;
         transition: transform 0.2s;
+        border-radius: 16px;
     }
     .gallery a img:hover {
         transform: scale(1.05);

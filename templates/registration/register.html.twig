@@ -4,16 +4,114 @@
 
 {% block body %}
     <h1>Register</h1>
+    <main>
+        {{ form_errors(registrationForm) }}
 
-    {{ form_errors(registrationForm) }}
+        {{ form_start(registrationForm) }}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+        {{ form_errors(registrationForm.email) }}
+        <div class="form-input-div">
+            {{ form_label(registrationForm.email) }}
+            {{ form_widget(registrationForm.email, { 'attr': {'class': 'custom-input'} }) }}
+        </div>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+        {{ form_errors(registrationForm.plainPassword.first) }}
+        <div class="form-input-div">
+            {{ form_label(registrationForm.plainPassword.first) }}
+            {{ form_widget(registrationForm.plainPassword.first, { 'attr': {'class': 'custom-input'} }) }}
+        </div>
+
+        {{ form_errors(registrationForm.plainPassword.second) }}
+        <div class="form-input-div">
+            {{ form_label(registrationForm.plainPassword.second) }}
+            {{ form_widget(registrationForm.plainPassword.second, { 'attr': {'class': 'custom-input'} }) }}
+        </div>
+
+
+        <div class="form-input-div checkbox-wrapper">
+            <label class="custom-checkbox">
+                {{ form_widget(registrationForm.agreeTerms, { 'attr': {'class': 'hidden-checkbox'} }) }}
+                <span class="checkmark"></span>
+                {{ form_label(registrationForm.agreeTerms) }}
+            </label>
+            {{ form_errors(registrationForm.agreeTerms) }}
+        </div>
+
+
+        <button type="submit" class="btn">register</button>
+
+        {{ form_end(registrationForm) }}
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+            flex-wrap: wrap;
+            flex-shrink: 1;
+        }
+
+        li {
+            background-color: transparent;
+            padding: 0;
+            color: #bf2020;
+        }
+
+        /* Hide native checkbox */
+        .hidden-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Custom checkbox container */
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Custom visual checkbox */
+        .custom-checkbox .checkmark {
+            width: 24px;
+            height: 24px;
+            background-color: #dadada;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            display: inline-block;
+            position: relative;
+        }
+
+        /* Tick styling */
+        .custom-checkbox .checkmark::after {
+            content: '✔';
+            color: white;
+            font-size: 16px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        /* Show checkmark when checked */
+        .hidden-checkbox:checked + .checkmark {
+            background-color: #444;
+        }
+
+        .hidden-checkbox:checked + .checkmark::after {
+            display: block;
+        }
+
+    </style>
 {% endblock %}

@@ -1,16 +1,18 @@
 {% extends 'product/base_product_show.html.twig' %}
 
 {% block extra_details %}
-    <tr>
-        <th>Condition</th>
-        <td>{{ product.productCondition }}</td>
-    </tr>
-    <tr>
-        <th>Storage (gb)</th>
-        <td>{{ product.storage }}</td>
-    </tr>
-    <tr>
-        <th>RAM (gb)</th>
-        <td>{{ product.ram }}</td>
-    </tr>
+    <div class="detail-card">
+        <span class="label">Condition</span>
+        <span class="value">{{ product.productCondition }}</span>
+    </div>
+
+    <div class="detail-card">
+        <span class="label">Storage (GB)</span>
+        <span class="value">{{ product.storage }}</span>
+    </div>
+
+    <div class="detail-card">
+        <span class="label">RAM (GB)</span>
+        <span class="value">{{ product.ram }}</span>
+    </div>
 {% endblock %}
