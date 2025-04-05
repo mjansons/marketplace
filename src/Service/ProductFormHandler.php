@@ -30,7 +30,6 @@ readonly class ProductFormHandler
         UserInterface $user
     ): void {
 
-        // update images
         $existingImages = $product->getImagePaths() ?? [];
         $uploadedFiles = $form->get('imageFiles')->getData();
         $existingImages = $this->imageHandler->processUploads($uploadedFiles, $existingImages);

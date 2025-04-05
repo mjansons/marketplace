@@ -68,6 +68,6 @@ class CarWorkflowTest extends KernelTestCase
         $car = $this->createCar();
 
         $this->expectException(\LogicException::class);
-        $this->workflowService->applyTransition($car, 'expire'); // Invalid transition
+        $this->workflowService->applyTransition($car, 'expire');
     }
 }
