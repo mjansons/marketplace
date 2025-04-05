@@ -21,7 +21,20 @@
                 {% for product in activeProducts %}
                     <li>
                         <div class="left-content">
-                        {{ product.title }} - Expires on: {{ product.expiryDate ? product.expiryDate|date('Y-m-d') : 'N/A' }}
+                            <div class="detail-card">
+                                <span class="label">Product</span>
+                                <span class="value">{{ product.title }}</span>
+                            </div>
+
+                            <div class="detail-card">
+                                <span class="label">Expires On</span>
+                                <span class="value">{{ product.expiryDate ? product.expiryDate|date('Y-m-d') : 'N/A' }}</span>
+                            </div>
+
+                            <div class="detail-card">
+                                <span class="label">Price</span>
+                                <span class="value">{{ product.price }} EUR</span>
+                            </div>
                         </div>
 
                         <div class="right-content">
@@ -42,7 +55,20 @@
                 {% for product in drafts %}
                     <li>
                         <div class="left-content">
-                        {{ product.title }} -
+                            <div class="detail-card">
+                                <span class="label">Product</span>
+                                <span class="value">{{ product.title }}</span>
+                            </div>
+
+                            <div class="detail-card">
+                                <span class="label">Expires On</span>
+                                <span class="value">{{ product.expiryDate ? product.expiryDate|date('Y-m-d') : 'N/A' }}</span>
+                            </div>
+
+                            <div class="detail-card">
+                                <span class="label">Price</span>
+                                <span class="value">{{ product.price }} EUR</span>
+                            </div>
 
                         </div>
 
@@ -75,7 +101,20 @@
                 {% for product in expiredProducts %}
                     <li>
                         <div class="left-content">
-                        {{ product.title }} -
+                            <div class="detail-card">
+                                <span class="label">Product</span>
+                                <span class="value">{{ product.title }}</span>
+                            </div>
+
+                            <div class="detail-card">
+                                <span class="label">Expires On</span>
+                                <span class="value">{{ product.expiryDate ? product.expiryDate|date('Y-m-d') : 'N/A' }}</span>
+                            </div>
+
+                            <div class="detail-card">
+                                <span class="label">Price</span>
+                                <span class="value">{{ product.price }} EUR</span>
+                            </div>
 
                         </div>
 
@@ -92,7 +131,7 @@
                                     <option value="4">4 Weeks</option>
                                 </select>
                             </label>
-                            <button type="submit" class="green-btn">re-publish</button>
+                            <button type="submit" class="green-btn">publish</button>
                         </form>
                             <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
                         </div>
@@ -104,4 +143,17 @@
         {% endif %}
     </div>
     </main>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+    li {
+        background-color: #d6d6d6;
+        padding: 16px 16px;
+    }
+
+    select {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+    }
+</style>
 {% endblock %}

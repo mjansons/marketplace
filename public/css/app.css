@@ -35,6 +35,13 @@ nav {
     background: #dadada;
 }
 
+.left-content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
 .right-content {
     display: flex;
     flex-direction: row;
@@ -254,7 +261,7 @@ th {
     background: #dadada;
     padding: 12px 16px;
     border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.06);
     display: flex;
     flex-direction: column;
     gap: 4px;
