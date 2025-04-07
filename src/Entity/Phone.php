@@ -63,9 +63,10 @@ class Phone extends BaseProduct
         return $this->productCondition;
     }
 
-    public function setProductCondition(string $productCondition): void
+    public function setProductCondition(?string $condition): static
     {
-        $this->productCondition = $productCondition;
+        $this->productCondition = $condition;
+        return $this;
     }
 
     public function getType(): string
