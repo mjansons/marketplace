@@ -2,14 +2,14 @@
 
 namespace App\Tests\Functional;
 
-use App\DataFixtures\ProductFixtures;
 use App\DataFixtures\UserFixtures;
+use App\DataFixtures\SingleCarFixture;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
 
-class ProductPublishTest extends WebTestCase
+class SingleCarPublishTest extends WebTestCase
 {
     protected AbstractDatabaseTool $databaseTool;
     protected KernelBrowser $client;
@@ -17,21 +17,22 @@ class ProductPublishTest extends WebTestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->client = static::createClient();
 
+        // Load user + single Car fixture
         $this->databaseTool = static::getContainer()
             ->get(DatabaseToolCollection::class)
             ->get();
+
         $this->databaseTool->loadFixtures([
             UserFixtures::class,
-            ProductFixtures::class,
+            SingleCarFixture::class,
         ]);
     }
 
-    public function testUserCanPublishAndUnpublishProduct(): void
+    public function testPublishCarAndCheckListing(): void
     {
-        // 1) Login as basic user
+        // 1) Log in with basic user
         $crawler = $this->client->request('GET', '/login');
         $loginForm = $crawler->selectButton('Sign in')->form([
             'email'    => 'basicuser@basicuser.basicuser',
@@ -41,47 +42,68 @@ class ProductPublishTest extends WebTestCase
         $this->client->followRedirect();
         $this->assertResponseIsSuccessful();
 
-        // 2) Go to /dashboard => see all draft products
+        // 2) Visit dashboard => see 1 draft car
         $crawler = $this->client->request('GET', '/dashboard');
         $this->assertResponseIsSuccessful();
 
-        // 3) Publish a product from the draft list
-        // find the first publish form under <h3>Drafts</h3>
+        // We expect exactly one publish form in the "Drafts" area
         $draftPublishForm = $crawler->filter('h3:contains("Drafts") + ul form[action^="/product/publish"]')->first();
-        // This locates the first <form> inside the <ul> that follows the <h3> titled "Drafts"
-        // Specifically, it's looking for a form with an action like /product/publish/{id}
+        $this->assertGreaterThan(
+            0,
+            $draftPublishForm->count(),
+            'Expected to find the single-car draft publish form!'
+        );
 
-        $this->assertGreaterThan(0, $draftPublishForm->count(), 'No draft publish form found!');
-        // Ensures that such a form was actually found — otherwise the test fails
-
-        // fill the publish form
+        // 3) Submit "publish" with 2 weeks duration
         $publishForm = $draftPublishForm->form([
-            'durationWeeks' => '2', // Select "2 weeks" from the dropdown
+            'durationWeeks' => '2',
         ]);
-
-        // Submit & follow
         $this->client->submit($publishForm);
         $this->client->followRedirect();
         $this->assertResponseIsSuccessful();
 
-        // 4) Now it should show in “Active”
+        // 4) Check it's now in "Active"
         $crawler = $this->client->request('GET', '/dashboard');
         $this->assertResponseIsSuccessful();
-        // find the first unpublish form under Active
-        $activeUnpublishForm = $crawler->filter('h3:contains("Active") + ul form[action^="/product/unpublish"]')->first();
-        $this->assertGreaterThan(0, $activeUnpublishForm->count(), 'No unpublish form found in Active section after publishing!');
 
-        // 5) Unpublish the newly published product
-        $unpublishForm = $activeUnpublishForm->form();
+        $activeUnpublishForm = $crawler->filter('h3:contains("Active") + ul form[action^="/product/unpublish"]')->first();
+        $this->assertGreaterThan(
+            0,
+            $activeUnpublishForm->count(),
+            'Expected the newly published car in Active section!'
+        );
+
+        // 5) Now confirm brand link in /car/cars/select-brand
+        $crawler = $this->client->request('GET', '/car/cars/select-brand');
+        $this->assertResponseIsSuccessful();
+
+        // We know brand is "Bmw"
+        $this->assertSelectorTextContains('ul', 'Bmw (1)');
+
+        // 6) Next, check the brand listing => /car/filter/Bmw
+        $crawler = $this->client->request('GET', '/car/filter/Bmw');
+        $this->assertResponseIsSuccessful();
+
+        // Confirm table has the row with "3 Series"
+        $this->assertStringContainsString(
+            '3 Series',
+            $crawler->filter('table')->text()
+        );
+
+        // 7) Unpublish again
+        $crawler = $this->client->request('GET', '/dashboard');
+        $unpublishForm = $crawler->filter('h3:contains("Active") + ul form[action^="/product/unpublish"]')->first()->form();
         $this->client->submit($unpublishForm);
         $this->client->followRedirect();
         $this->assertResponseIsSuccessful();
 
-        // 6) Check it's back in draft (or maybe it disappears from Active)
+        // 8) Confirm it’s back in Drafts
         $crawler = $this->client->request('GET', '/dashboard');
-        $this->assertResponseIsSuccessful();
-
-        // We can confirm there's at least one publish form in “Drafts” again
         $this->assertSelectorExists('h3:contains("Drafts") + ul form[action^="/product/publish"]');
+
+        // 9) Confirm Bmw is no longer listed
+        $crawler = $this->client->request('GET', '/car/cars/select-brand');
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorNotExists('a:contains("Bmw (")');
     }
 }
