@@ -280,3 +280,6 @@ th {
     color: #000;
 }
 
+.page-buttons {
+    margin: 16px auto 0;
+}

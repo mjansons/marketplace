@@ -117,11 +117,12 @@
 
             <a href="{{ path('app_index') }}">back</a>
         </div>
-        <div>
+
+        <div class="page-buttons">
             {% if page > 1 %}
                 <a href="{{ path('app_computer_index', filters|merge({'page': page - 1})) }}">Previous</a>
-                <span>Page {{ page }}</span>
             {% endif %}
+                <span>Page {{ page }}</span>
             {% if computers|length == 10 %}
                 <a href="{{ path('app_computer_index', filters|merge({'page': page + 1})) }}">Next</a>
             {% endif %}

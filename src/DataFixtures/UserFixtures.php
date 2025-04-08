@@ -20,6 +20,7 @@ class UserFixtures extends Fixture
         $user->setRoles(['ROLE_USER']);
         $manager->persist($user);
 
+        $this->addReference('user_regular', $user);
         // Admin user
         $admin = new User();
         $admin->setEmail('adminuser@adminuser.adminuser');
@@ -27,7 +28,9 @@ class UserFixtures extends Fixture
         $admin->setRoles(['ROLE_ADMIN']);
         $manager->persist($admin);
 
+        $this->addReference('user_admin', $admin);
         $manager->flush();
+
     }
 }
 

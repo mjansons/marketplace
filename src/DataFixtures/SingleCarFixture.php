@@ -34,5 +34,6 @@ class SingleCarFixture extends Fixture
 
         $manager->persist($car);
         $manager->flush();
+        $this->addReference('car_single', $car);
     }
 }

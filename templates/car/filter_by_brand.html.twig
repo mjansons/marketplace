@@ -153,11 +153,11 @@
 
 
         <!-- Pagination -->
-        <div>
+        <div class="page-buttons">
             {% if page > 1 %}
                 <a href="{{ path('app_car_filter_by_brand', filters|merge({'page': page - 1})) }}">Previous</a>
-                <span>Page {{ page }}</span>
             {% endif %}
+            <span>Page {{ page }}</span>
             {% if cars|length == 10 %}
                 <a href="{{ path('app_car_filter_by_brand', filters|merge({'page': page + 1})) }}">Next</a>
             {% endif %}

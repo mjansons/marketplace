@@ -48,7 +48,7 @@
             {% if referrer is not empty %}
                 <a href="{{ referrer }}">back</a>
             {% else %}
-                {% if isAdmin %}
+                {% if isAdmin is defined and isAdmin %}
                     <a href="{{ path('admin_car_index') }}">back to admin dashboard</a>
                 {% endif %}
             {% endif %}
