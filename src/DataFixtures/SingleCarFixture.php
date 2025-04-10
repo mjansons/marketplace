@@ -9,6 +9,9 @@ use Doctrine\Persistence\ObjectManager;
 
 class SingleCarFixture extends Fixture
 {
+
+
+
     public function load(ObjectManager $manager): void
     {
         // 1) Retrieve the basic user

@@ -27,7 +27,8 @@ readonly class ProductFormHandler
         FormInterface $form,
         Request $request,
         object $product,
-        UserInterface $user
+        UserInterface $user,
+        bool $isEdit = false
     ): void {
 
         $existingImages = $product->getImagePaths() ?? [];
@@ -39,6 +40,10 @@ readonly class ProductFormHandler
         $existingImages = $this->imageHandler->processRemovals($removedImages, $existingImages);
 
         $product->setImagePaths($existingImages);
+
+        if ($isEdit && $product->getStatus() === 'published') {
+            $product->setStatus('draft');
+        }
 
         // admin related logic
         if ($product->getStatus() === "published") {

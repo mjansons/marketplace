@@ -8,10 +8,11 @@ use App\Entity\Computer;
 use App\Entity\User;
 use App\Service\CarData;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Random\RandomException;
 
-class ProductFixtures extends Fixture
+class ProductFixtures extends Fixture implements FixtureGroupInterface
 {
     /**
      * @throws RandomException
@@ -100,5 +101,10 @@ class ProductFixtures extends Fixture
     private function randomElement(array $array): mixed
     {
         return $array[array_rand($array)];
+    }
+
+    public static function getGroups(): array
+    {
+        return ['products'];
     }
 }
