@@ -179,3 +179,7 @@ mjansons-marketplace/
 ├── composer.json         # PHP dependencies
 └── docker-compose.yaml   # Optional Docker setup
 ```
+
+---
+
+## Screenshots 
