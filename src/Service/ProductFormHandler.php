@@ -30,7 +30,6 @@ readonly class ProductFormHandler
         UserInterface $user,
         bool $isEdit = false
     ): void {
-
         $existingImages = $product->getImagePaths() ?? [];
         $uploadedFiles = $form->get('imageFiles')->getData();
         $existingImages = $this->imageHandler->processUploads($uploadedFiles, $existingImages);
@@ -45,34 +44,33 @@ readonly class ProductFormHandler
             $product->setStatus('draft');
         }
 
-        // admin related logic
-        if ($product->getStatus() === "published") {
-
-            $expiryDate = $product->getExpiryDate();
-
-            if (!$expiryDate) {
-                $product->setStatus('draft');
-            }
-
-            if ($expiryDate->getTimestamp() <= time()){
-                $product->setStatus('expired');
-            }
-
-            if (!$product->getPublishDate()) {
-                $product->setPublishDate(new DateTime());
-            }
-
-            $delayMs = ($expiryDate->getTimestamp() - time()) * 1000;
-            $this->bus->dispatch(new ExpireAdMessage($product->getId()), [
-                new DelayStamp($delayMs)
-            ]);
-        }
-
         if (!$product->getUser()) {
             $product->setUser($user);
         }
 
         $this->entityManager->persist($product);
         $this->entityManager->flush();
+
+        // admin related logic after flush
+        if ($product->getStatus() === "published") {
+            $expiryDate = $product->getExpiryDate();
+
+            if (!$expiryDate) {
+                $product->setStatus('draft');
+            } elseif ($expiryDate->getTimestamp() <= time()) {
+                $product->setStatus('expired');
+            } else {
+                if (!$product->getPublishDate()) {
+                    $product->setPublishDate(new DateTime());
+                }
+
+                $delayMs = ($expiryDate->getTimestamp() - time()) * 1000;
+                $this->bus->dispatch(new ExpireAdMessage($product->getId()), [
+                    new DelayStamp($delayMs)
+                ]);
+            }
+
+            $this->entityManager->flush();
+        }
     }
 }
