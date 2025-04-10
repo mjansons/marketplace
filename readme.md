@@ -18,8 +18,8 @@ Includes filtering, publishing, and automated expiry of listings.
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourname/mjansons-marketplace.git
-cd mjansons-marketplace
+git clone https://github.com/mjansons/marketplace
+cd marketplace
 ```
 
 ### 1. Environment Configuration
@@ -159,7 +159,7 @@ http://localhost:8080/admin
 ## 📁 Project Structure
 
 ```bash
-mjansons-marketplace/
+marketplace/
 ├── bin/                  # Console commands
 ├── config/               # Symfony configuration
 ├── migrations/           # Doctrine migrations
