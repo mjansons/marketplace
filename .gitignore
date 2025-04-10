@@ -2,6 +2,7 @@
 .env.dev
 .env.test
 .idea
+.phpunit.result.cache
 
 /public/uploads/products/*
 !public/uploads/products/.gitkeep
