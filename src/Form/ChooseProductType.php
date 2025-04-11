@@ -18,6 +18,7 @@ class ChooseProductType extends AbstractType
                     'Car' => 'car',
                     'Computer' => 'computer',
                     'Phone' => 'phone',
+                    'Camera' => 'camera',
                 ],
                 'placeholder' => 'Choose product type',
             ]);

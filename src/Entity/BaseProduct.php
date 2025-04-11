@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\InheritanceType("JOINED")]
 #[ORM\DiscriminatorColumn(name: "type", type: "string")]
-#[ORM\DiscriminatorMap(["phone" => Phone::class, "car" => Car::class, "computer" => Computer::class])]
+#[ORM\DiscriminatorMap(["phone" => Phone::class, "car" => Car::class, "computer" => Computer::class, "camera" => Camera::class])]
 #[ORM\Entity(repositoryClass: BaseProductRepository::class)]
 abstract class BaseProduct
 {

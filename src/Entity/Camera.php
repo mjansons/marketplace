@@ -2,21 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\PhoneRepository;
+use App\Repository\CameraRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
-#[ORM\Entity(repositoryClass: PhoneRepository::class)]
-class Phone extends BaseProduct
+#[ORM\Entity(repositoryClass: CameraRepository::class)]
+class Camera extends BaseProduct
 {
     #[ORM\Column(length: 100)]
     private ?string $brand = null;
 
     #[ORM\Column(length: 150)]
     private ?string $model = null;
-
-    #[ORM\Column]
-    private ?int $memory = null;
 
     #[ORM\Column(name: "product_condition", type: "string", length: 100)]
     private string $productCondition;
@@ -45,18 +42,6 @@ class Phone extends BaseProduct
         return $this;
     }
 
-    public function getMemory(): ?int
-    {
-        return $this->memory;
-    }
-
-    public function setMemory(int $memory): static
-    {
-        $this->memory = $memory;
-
-        return $this;
-    }
-
     public function getProductCondition(): string
     {
         return $this->productCondition;
@@ -70,6 +55,6 @@ class Phone extends BaseProduct
 
     public function getType(): string
     {
-        return 'phone';
+        return 'camera';
     }
 }

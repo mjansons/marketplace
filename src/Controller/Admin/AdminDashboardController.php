@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Camera;
 use App\Entity\Car;
 use App\Entity\Computer;
 use App\Entity\Phone;
@@ -30,6 +31,7 @@ class AdminDashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToCrud('Cars', 'fas fa-car', Car::class);
         yield MenuItem::linkToCrud('Phones', 'fas fa-mobile-alt', Phone::class);
+        yield MenuItem::linkToCrud('Cameras', 'fas fa-camera-alt', Camera::class);
         yield MenuItem::linkToCrud('Computers', 'fas fa-desktop', Computer::class);
         yield MenuItem::linkToCrud('User', 'fas fa-user', User::class);
         yield MenuItem::linkToRoute('Back to Home', 'fas fa-home', 'app_index');

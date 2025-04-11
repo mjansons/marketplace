@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\BaseProduct;
+use App\Entity\Camera;
 use App\Entity\Car;
 use App\Entity\Computer;
 use App\Entity\Phone;
+use App\Form\CameraType;
 use App\Form\CarType;
 use App\Form\ChooseProductType;
 use App\Form\ComputerType;
@@ -33,7 +35,6 @@ class ProductController extends AbstractController
     #[Route('/product/new', name: 'app_product_new')]
     public function chooseType(Request $request): Response
     {
-        // Step 1: show user a simple form to pick product type
         $chooseForm = $this->createForm(ChooseProductType::class);
         $chooseForm->handleRequest($request);
 
@@ -70,6 +71,10 @@ class ProductController extends AbstractController
             case 'phone':
                 $product = new Phone();
                 $formClass = PhoneType::class;
+                break;
+            case 'camera':
+                $product = new Camera();
+                $formClass = CameraType::class;
                 break;
             default:
                 throw $this->createNotFoundException('Invalid product type');
@@ -129,6 +134,9 @@ class ProductController extends AbstractController
         } elseif ($product instanceof Phone) {
             $type = 'phone';
             $formClass = PhoneType::class;
+        } elseif ($product instanceof Camera) {
+            $type = 'camera';
+            $formClass = CameraType::class;
         } else {
             throw new \LogicException('Unknown product type');
         }

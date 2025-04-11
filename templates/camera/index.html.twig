@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Phone Marketplace{% endblock %}
+{% block title %}Camera Marketplace{% endblock %}
 
 {% block body %}
     <main>
 
-        <h1>Phone Marketplace</h1>
+        <h1>Camera Marketplace</h1>
 
         <!-- Filter Form -->
-        <form method="get" action="{{ path('app_phone_index') }}">
+        <form method="get" action="{{ path('app_camera_index') }}">
             <label>
                 Brand:
                 <input type="text" name="brand" value="{{ filters.brand ?? '' }}">
@@ -16,10 +16,6 @@
             <label>
                 Model:
                 <input type="text" name="model" value="{{ filters.model ?? '' }}">
-            </label>
-            <label>
-                Memory (GB):
-                <input type="number" name="memory" value="{{ filters.memory ?? '' }}" min="0" step="1">
             </label>
             <label>
                 Condition:
@@ -48,22 +44,17 @@
             <tr>
                 <td></td>
                 <th>
-                    <a href="{{ path('app_phone_index', filters|merge({'sort': 'brand', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    <a href="{{ path('app_camera_index', filters|merge({'sort': 'brand', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
                         Brand
                     </a>
                 </th>
                 <th>
-                    <a href="{{ path('app_phone_index', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    <a href="{{ path('app_camera_index', filters|merge({'sort': 'model', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
                         Model
                     </a>
                 </th>
                 <th>
-                    <a href="{{ path('app_phone_index', filters|merge({'sort': 'memory', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
-                        Memory (GB)
-                    </a>
-                </th>
-                <th>
-                    <a href="{{ path('app_phone_index', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
+                    <a href="{{ path('app_camera_index', filters|merge({'sort': 'price', 'direction': filters.direction == 'ASC' ? 'DESC' : 'ASC'})) }}">
                         Price (€)
                     </a>
                 </th>
@@ -71,25 +62,24 @@
                     Actions
                 </th>
             </tr>
-            {% for phone in phones %}
+            {% for camera in cameras %}
                 <tr>
                     <td>
-                        {% if phone.imagePaths is not empty %}
-                            <img src="{{ asset('uploads/products/' ~ phone.imagePaths|first) }}" alt="Phone Thumbnail"
+                        {% if camera.imagePaths is not empty %}
+                            <img src="{{ asset('uploads/products/' ~ camera.imagePaths|first) }}" alt="Camera Thumbnail"
                                  width="50" height="50">
                         {% else %}
-                            <img src="{{ asset('uploads/products/no_image.png') }}" alt="Phone Thumbnail" width="50"
+                            <img src="{{ asset('uploads/products/no_image.png') }}" alt="Camera Thumbnail" width="50"
                                  height="50">
                         {% endif %}
                     </td>
-                    <td>{{ phone.brand }}</td>
-                    <td>{{ phone.model }}</td>
-                    <td>{{ phone.memory }}</td>
-                    <td>{{ phone.price }}</td>
+                    <td>{{ camera.brand }}</td>
+                    <td>{{ camera.model }}</td>
+                    <td>{{ camera.price }}</td>
                     <td>
-                        <a href="{{ path('app_phone_show', {'id': phone.id}) }}">show</a>
-                        {% if phone.user == app.user %}
-                            <a href="{{ path('app_product_edit', {'id': phone.id}) }}" class="blue-btn">edit</a>
+                        <a href="{{ path('app_camera_show', {'id': camera.id}) }}">show</a>
+                        {% if camera.user == app.user %}
+                            <a href="{{ path('app_product_edit', {'id': camera.id}) }}" class="blue-btn">edit</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -102,7 +92,7 @@
 
         <div class="bottom-buttons">
             {% if app.user %}
-                <a href="{{ path('app_product_new_type', {'type': 'phone'}) }}" class="blue-btn">+ New Ad</a>
+                <a href="{{ path('app_product_new_type', {'type': 'camera'}) }}" class="blue-btn">+ New Ad</a>
             {% endif %}
 
             <a href="{{ path('app_index') }}">Back</a>
@@ -111,11 +101,11 @@
 
         <div class="page-buttons">
             {% if page > 1 %}
-                <a href="{{ path('app_phone_index', filters|merge({'page': page - 1})) }}">Previous</a>
+                <a href="{{ path('app_camera_index', filters|merge({'page': page - 1})) }}">Previous</a>
             {% endif %}
             <span>Page {{ page }}</span>
-            {% if phones|length == 10 %}
-                <a href="{{ path('app_phone_index', filters|merge({'page': page + 1})) }}">Next</a>
+            {% if cameras|length == 10 %}
+                <a href="{{ path('app_camera_index', filters|merge({'page': page + 1})) }}">Next</a>
             {% endif %}
         </div>
     </main>

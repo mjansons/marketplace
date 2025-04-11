@@ -10,6 +10,10 @@
             <a href="{{ path('app_car_select_brand')}}">Cars</a>
             <a href="{{ path('app_phone_index')}}">Phones</a>
             <a href="{{ path('app_computer_index')}}">Computers</a>
+            <a href="{{ path('app_camera_index')}}">Cameras</a>
+            {% if app.user %}
+                <a href="{{ path('app_product_new') }}" class="blue-btn">+ New Ad</a>
+            {% endif %}
         </div>
     </main>
 {% endblock %}
